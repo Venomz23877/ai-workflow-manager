@@ -1,0 +1,11 @@
+## Rule: Verify Signatures on Shared Utilities
+
+- Before invoking or modifying shared utility wrappers (logging, metrics, tracing, etc.), you **must** review the wrapper’s interface:
+  - Inspect the implementation or existing call sites to confirm argument order, types, and behavior.
+  - Do not rely on assumptions or generic patterns; verify the exact signature in this codebase.
+- If the signature cannot be confirmed quickly:
+  - Add a TODO and escalate before committing changes.
+  - Do **not** ship instrumentation or diagnostics that haven’t been validated against the wrapper’s actual contract.
+- Document the verification step in the PR description or commit message when adding new logging/metrics.
+
+Breaking this rule is considered a major process violation; review the mistakes log before ending the session if it happens again.

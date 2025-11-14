@@ -1,0 +1,16 @@
+---
+description: Frontend formatting guard—run Prettier proactively so Husky hooks never fail.
+alwaysApply: true
+steps: |
+  1. Before staging web-portal changes, run `yarn prettier --write src/` to format all source files.
+  2. Re-run `yarn prettier --write` for any additional paths (e.g., `apps/<name>/src`) touched outside the default tree.
+  3. Inspect the diff to confirm only intentional formatting changes were applied; restage if necessary.
+  4. If formatting introduces unexpected diffs, resolve underlying code issues rather than skipping Prettier.
+  5. Document in the pre-commit note that Prettier ran cleanly before invoking Husky hooks.
+integration: |
+  - Execute this rule before Step 5 of `commit-procedure.mdc` to avoid repeated hook failures.
+  - When pair programming or reviewing, remind collaborators to run the command prior to committing shared work.
+escalation: |
+  - If Prettier fails due to configuration issues, pause the commit, fix the formatter setup, and record the resolution in `.ai_working/lessons_learned.md`.
+  - Never bypass Husky hooks; escalate to the team if a blocking formatter bug appears.
+---

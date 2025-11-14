@@ -1,0 +1,18 @@
+---
+description: Dynamoose integration standard—use nestjs-dynamoose patterns and prevent table creation regressions.
+alwaysApply: true
+steps: |
+  1. Use `DynamooseModule.forRoot()` to configure global defaults (e.g., `create: false`, region) before registering any models.
+  2. Register models via `DynamooseModule.forFeature()` with explicit `tableName`, `create: false`, and other options; never instantiate models at module-load time with raw `dynamoose.model()`.
+  3. Inject models using `@InjectModel()` within services/providers; remove direct imports of raw models.
+  4. Confirm infrastructure separation: CDK/Terraform must create tables; IAM policies should deny `CreateTable`/`UpdateTable` from the application role.
+  5. Review existing modules (e.g., `videos` module) for reference before adding new DynamoDB integrations to ensure consistency.
+  6. Document rollback/cleanup steps and ensure seeded data can be removed without destructive table operations.
+validation: |
+  - Run `npx prisma migrate status` or relevant infra checks to confirm tables already exist before deployment.
+  - Add integration tests that fail if the app attempts to create or update tables at runtime.
+  - Verify logs and configuration during startup to ensure no table creation calls occur.
+escalation: |
+  - If legacy code still uses raw Dynamoose patterns, halt new work and plan a refactor before extending functionality.
+  - Escalate any need for runtime table creation; do not bypass IAM safeguards.
+---

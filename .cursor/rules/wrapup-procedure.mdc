@@ -1,0 +1,16 @@
+---
+description: Session wrap-up checklist—capture progress so the next startup can resume instantly.
+alwaysApply: false
+steps: |
+  1. Review the active TODO list; mark completed work, add newly discovered tasks, and note blockers requiring follow-up.
+  2. Summarize the day’s activity in `.ai_working/wrapup.md`: include what changed, verification performed, open issues, and recommended next steps.
+  3. Document insights or process adjustments in `.ai_working/lessons_learned.md` when new takeaways emerge.
+  4. Clean the `.ai_working/` directory: remove obsolete scratch files, archive artifacts worth keeping, and reference any remaining items in the wrap-up note.
+  5. Record pending environment or tooling requirements (ports, seeds, credentials) so the next session can recreate the setup quickly.
+  6. Double-check `.cursor/rules/*.mdc` for updates made during the session and mention any critical rule changes in the wrap-up entry.
+artifacts: |
+  - `.ai_working/wrapup.md`
+  - `.ai_working/lessons_learned.md`
+  - `.ai_working/` curated files
+  - Updated TODO list / blockers log
+---

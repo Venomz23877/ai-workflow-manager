@@ -1,0 +1,16 @@
+---
+description: when making a commit to a branch already part of a PR ensure that the comments related to fixes made since the PR was created. Also, when making a commit add comments about the execution of our prior to commit QA checklist.
+alwaysApply: true
+steps: |
+  1. Sync with the target branch: `git fetch --all` and `git merge dev` (or the relevant parent) before committing.
+  2. Review the diff for stray debug code, temporary files, or secrets; delete or relocate anything that does not belong in the repo (temporary docs go to `.ai_working/`).
+  3. Run `git status` and clear out unrelated or unexpected changes; confirm the working tree contains only intended edits.
+  4. Execute the QA pre-commit checklist in `.cursor/rules/qa-precommit-checklist.mdc` (merge parent, `yarn build`, investigate warnings, enforce localization/component usage, verify `useResponsive`).
+  5. Format touched source files prior to staging: `yarn prettier --write src/` (lesson learned—prettier must run before the Husky hook; see `.ai_working/lessons_learned.md`).
+  6. Run validations locally: `yarn lint` plus targeted unit/integration tests touching the change scope; resolve failures rather than bypassing hooks.
+  7. Stage intentional files only (`git add <files>`), then recheck `git status` to confirm the staged set.
+  8. Re-read the staged diff to ensure documentation, localization keys, and type definitions stay in sync with the code.
+  9. Compose commit message notes that include QA checklist execution, reference any fixes since PR creation, and link to related tickets when applicable.
+  10. Commit and push without disabling Husky or other checks; if a hook fails, address the root cause and retry.
+  11. After push, verify CI started, update PR description or tracking docs (`.ai_working/wrapup.md`) with follow-up context, and note any outstanding QA actions for the next session.
+---

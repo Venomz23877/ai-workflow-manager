@@ -1,0 +1,11 @@
+---
+description: when we commit to github be sure to sync with remote every time. we dont' want any local only branches or commits.
+alwaysApply: true
+steps: |
+  1. Fetch and prune remotes first: `git fetch --all --prune`.
+  2. Check branch tracking status: `git status --branch` and `git branch -vv`; resolve any `ahead` counts before ending the session.
+  3. Push the current branch explicitly: `git push origin <branch>`; never rely on background autosync.
+  4. Verify the push landed by inspecting `git log origin/<branch> -1` or checking the GitHub UI for the latest commit hash.
+  5. For long-lived feature branches, push work-in-progress commits at least daily to avoid local-only history.
+  6. After a successful push, capture follow-up items in `.ai_working/wrapup.md` and note any next steps for reviewers.
+---

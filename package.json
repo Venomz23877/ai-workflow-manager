@@ -2,7 +2,7 @@
   "name": "ai-workflow-manager",
   "version": "0.1.0",
   "description": "AI-powered workflow management tool with GUI and CLI",
-  "main": "dist/main/main.js",
+  "main": "dist/main/main/main.js",
   "author": "Actual Outcomes LLC",
   "license": "MIT",
   "private": true,
@@ -18,7 +18,7 @@
     "package": "npm run build && electron-builder",
     "package:win": "npm run build && electron-builder --win",
     "package:mac": "npm run build && electron-builder --mac",
-    "cli": "node dist/cli/index.js",
+    "cli": "node dist/cli/cli/index.js",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {

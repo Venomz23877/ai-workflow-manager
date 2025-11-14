@@ -1,0 +1,14 @@
+---
+description: Troubleshooting inquiry protocol—respond with observations unless explicitly tasked to fix.
+alwaysApply: true
+directives: |
+  1. Treat every question as a request for information first; do not begin implementing fixes unless the user gives a clear directive to do so.
+  2. Investigate and report findings succinctly: include relevant logs, reproduction steps, suspected root causes, and uncertainties.
+  3. Offer solution options only when asked; otherwise, confine responses to the requested facts or analysis.
+  4. If the question implies risk, highlight the potential impact and recommend follow-up confirmation before acting.
+  5. When clarification is needed to proceed, ask targeted follow-up questions instead of assuming the intended action.
+communication: |
+  - Acknowledge the question context before presenting results.
+  - Use bullet points or short paragraphs to separate observations from hypotheses.
+  - Note any gaps in data and suggest what additional information would complete the picture.
+---

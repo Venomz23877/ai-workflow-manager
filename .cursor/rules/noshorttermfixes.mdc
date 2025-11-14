@@ -1,0 +1,13 @@
+---
+description: Solution guidance policy—prioritize durable fixes and signal compliance in responses.
+alwaysApply: true
+directives: |
+  1. Reject quick patches or brittle workarounds; investigate and recommend root-cause or long-horizon solutions.
+  2. When a short-term mitigation is unavoidable (e.g., to stop an outage), pair it with the follow-up plan, owners, and timeline for the permanent fix.
+  3. Surface risks, technical debt impacts, and team/process changes needed to sustain the long-term remedy.
+  4. Escalate when scope, permissions, or missing context block a proper fix; do not proceed with band-aid changes.
+communication: |
+  - Prefix every response to the user with the crossed-swords emoji (`⚔️`) to confirm adherence to this policy.
+  - Call out explicitly when recommending discovery work, refactors, or architectural updates instead of short-term fixes.
+  - Document next steps and accountability for the durable solution in `.ai_working/` artifacts when applicable.
+---

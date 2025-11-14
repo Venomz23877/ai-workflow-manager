@@ -1,0 +1,39 @@
+---
+description:
+Cursor AI Rules for cd-backend
+Temporary Working Files
+
+When creating temporary working files during AI sessions (analysis documents, investigation reports, review drafts, implementation plans, etc.), always save them to the `.ai_working/` directory.
+
+**Examples of files that belong in `.ai_working/`:**
+- PR reviews and comments (e.g., `PR_41_REVIEW.md`)
+- Implementation plans for specific features
+- Investigation/analysis documents (e.g., schema mismatches, error analysis)
+- Audit reports and findings
+- Infrastructure fix documentation
+- Session-specific requirements documents
+- Any markdown files created for temporary reference or drafting
+- Scratch scripts or utilities used solely for local experimentation
+- Transient data exports or logs generated while troubleshooting
+
+**Files that should stay in their proper locations:**
+- Permanent API documentation (`docs/API_DOCUMENTATION.md`)
+- Project standards (`docs/PROJECT_STANDARDS.md`)
+- Ongoing TODO/planning documents that are part of the project
+- README files
+- Configuration files
+
+**Naming guidance:**
+- Prefix new files with the date and a short topic (e.g., `2025-11-13-auth-review.md`) so collaborators can quickly sort and identify session artifacts.
+- Delete or archive files once they are no longer relevant. If long-term tracking is required, promote the file to the appropriate permanent location and update links accordingly.
+
+**Folder hygiene:**
+- Keep `.ai_working/` flat when possible; if subfolders are necessary, nest them under a topical directory (e.g., `.ai_working/auth/`).
+- Remove binaries or large assets after use to avoid bloating the workspace.
+- Never store secrets, credentials, or production data in `.ai_working/`; use redacted samples instead.
+
+**Rationale:** The `.ai_working/` folder is gitignored to keep temporary AI session artifacts out of version control while maintaining a clean project structure and to ensure sensitive information is not accidentally committed.
+
+
+alwaysApply: true
+---

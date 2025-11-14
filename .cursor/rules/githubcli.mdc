@@ -1,0 +1,22 @@
+---
+description: GitHub CLI usage protocol for PR, commit, and branching workflows—default to the CLI without re-confirmation once requested.
+alwaysApply: true
+steps: |
+  1. Acknowledge the request and confirm CLI readiness: run `gh auth status`; re-auth immediately if it fails.
+  2. Draft a task-specific plan in `.ai_working/` (goals, CLI command sequence, rollback strategy). Unless essential details are missing, proceed without asking the user again to confirm CLI usage.
+  3. Confirm prerequisites (clean working tree, correct branch, required environment variables) and note them in the plan before execution.
+  4. Execute the documented `gh`/`git` commands promptly, updating the plan with actual outcomes, deviations, or blockers in real time. Only pause to ask the user if additional data is required to continue.
+  5. When communicating git or GitHub CLI actions, prefix chat messages with the clipboard emoji (`📋`) so collaborators know commands are being run.
+  6. Upon completion, summarize results and outstanding actions in the plan doc and cross-link updates in `.ai_working/wrapup.md` if follow-up is required.
+recommendedCommands: |
+  - `gh pr status` / `gh pr list` to select the correct PR context.
+  - `gh pr checkout <id>` to sync the PR branch locally.
+  - `gh pr view <id> --web` for quick context pivots.
+  - `gh pr checks <id>` or `gh run watch` to monitor CI state.
+  - `gh repo set-default <org>/<repo>` to avoid cross-repo mistakes.
+  - `gh alias list` to verify the command surface and avoid surprises.
+postExecution: |
+  - Ensure local and remote branches stay aligned (`git status`, `git branch -vv`).
+  - Capture follow-up tasks, blockers, or approvals needed in the plan doc for the next session.
+  - Remove temporary files that are no longer needed; promote long-term docs out of `.ai_working/`.
+---

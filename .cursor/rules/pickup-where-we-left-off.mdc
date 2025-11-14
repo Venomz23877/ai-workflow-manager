@@ -1,0 +1,10 @@
+---
+description: Session restart checklist to resume exactly where we left off.
+alwaysApply: false
+steps: |
+  1. Review recent context: open `.ai_working/wrapup.md`, last session’s plan documents, and the active TODO list to understand completed work and pending items.
+  2. Verify repository state: `git fetch --all --prune`, check for upstream changes on the target branch, and note any new PR comments or CI events in GitHub.
+  3. Ensure the working branch is current: rebase onto the parent branch (e.g., `git rebase origin/dev`) unless project guidance specifies a merge; resolve conflicts immediately.
+  4. Reconcile local tasks: update the TODO list to reflect the next actionable steps, and confirm tooling/servers/env vars from the prior session are still valid.
+  5. Document kickoff notes: append a brief “Session start” entry in `.ai_working/wrapup.md` summarizing the focus, dependencies, and risks before proceeding with new work.
+---

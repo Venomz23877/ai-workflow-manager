@@ -4,15 +4,26 @@ import { WorkflowDatabase } from '../core/database'
 
 let mainWindow: BrowserWindow | null = null
 let db: WorkflowDatabase
+const isDevelopment = process.env.NODE_ENV === 'development'
+
+function getPreloadPath(appBasePath: string) {
+  return path.join(appBasePath, 'dist', 'preload', 'preload.js')
+}
+
+function getRendererPath(appBasePath: string) {
+  return path.join(appBasePath, 'dist', 'renderer', 'index.html')
+}
 
 function createWindow() {
+  const appBasePath = app.getAppPath()
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
-      preload: path.join(__dirname, '../preload/preload.js'),
+      preload: getPreloadPath(appBasePath),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
@@ -22,11 +33,11 @@ function createWindow() {
   })
 
   // Load the app
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopment) {
     mainWindow.loadURL('http://localhost:5173')
     mainWindow.webContents.openDevTools()
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(getRendererPath(appBasePath))
   }
 
   // Show window when ready

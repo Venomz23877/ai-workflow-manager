@@ -1,0 +1,85 @@
+# Static Analysis Checklist (PR Review)
+
+Use this checklist during code review before merge. Focus on correctness, consistency, and repo standards.
+
+## 1) Routing & Navigation
+- [ ] New/changed routes are consistent and typed (e.g., `/scenarios/[id]/practice/[practiceId]/step/[stepId]`).
+- [ ] All links, redirects, and deep links build the correct path (includes required IDs).
+- [ ] Pages handle missing/invalid route params gracefully (fallback, 404, or redirect).
+
+## 2) Component & Design System Usage
+- [ ] Import UI from `@/components` barrel, not deep paths.
+- [ ] Use existing components from `src/components/` (buttons, inputs, tabs, common, layout) instead of raw HTML when available.
+- [ ] Follow CSS variables and spacing/radius tokens defined in `src/app/globals.css`.
+- [ ] Use `ConDIcons` for icons where applicable.
+
+## 3) Internationalization (next-intl)
+- [ ] No hardcoded user‑facing strings; use `useTranslations()` and keys.
+- [ ] Keys exist in both `src/messages/en.json` and `src/messages/es.json`.
+- [ ] Removed/renamed keys are cleaned up across locales.
+
+## 4) Hooks & Effects Hygiene
+- [ ] React hooks follow rules-of-hooks and dependency arrays are correct.
+- [ ] Side effects (media, timers, subscriptions) have cleanup in `useEffect` return.
+- [ ] Avoid stale closures; wrap callbacks with `useCallback` when passed to children.
+
+## 5) State & Providers
+- [ ] Context/provider APIs are stable and null-safe. Default values won’t crash consumers.
+- [ ] Provider changes are re-exported in `src/providers/index.ts` and used consistently.
+- [ ] No unnecessary re-renders (memoize heavy values/selectors if needed).
+
+## 6) Types & Mapping
+- [ ] Backend → frontend mappers are correct and null-safe.
+- [ ] Dates/IDs/numbers are in expected types (convert strings to Date where needed).
+- [ ] API request/response types align with backend docs.
+- [ ] Avoid `any`; prefer explicit types and discriminated unions.
+
+## 7) API Calls & Errors
+- [ ] API clients use centralized helpers; include auth headers correctly.
+- [ ] Proper error handling and user feedback (toasts/messages). No silent failures.
+- [ ] No leftover debug logging of sensitive data.
+
+## 8) Accessibility & Semantics
+- [ ] Interactive elements use correct roles/labels/aria; keyboard accessible.
+- [ ] Images use `next/image` or an approved loader; include alt text.
+- [ ] Color contrast and focus states preserved.
+
+## 9) Performance
+- [ ] Avoid unnecessary re-fetching; cache/memoize where reasonable.
+- [ ] No large inline objects/arrays in dependency arrays; memoize configs.
+- [ ] Defer heavy work (lazy load/code-split) where appropriate.
+
+## 10) Media & Device Management
+- [ ] Media tracks (camera/mic) are started only when needed and stopped on unmount.
+- [ ] Streams are released; `video.srcObject` is cleared in cleanup.
+- [ ] Chunking thresholds meet backend/storage constraints.
+
+## 11) Security & Config
+- [ ] Secrets, URLs, feature flags pulled from env (via `src/lib/env-config.ts`).
+- [ ] `.env_sample` updated for new variables with safe defaults.
+- [ ] No credentials or tokens logged to console.
+
+## 12) Logging & Debug
+- [ ] Remove `console.log` noise; keep only actionable logs (guard by env if needed).
+- [ ] No stack traces exposed to users; errors surfaced via UX patterns.
+
+## 13) Tests & QA Readiness
+- [ ] Critical logic covered by unit/integration tests where feasible.
+- [ ] Added/updated stories/examples for new components (if applicable).
+- [ ] QA steps documented in PR description.
+
+## 14) Files & Structure
+- [ ] Dead code and unused files removed (prefer not to keep `*-old.tsx`).
+- [ ] Barrel files updated (`@/components`, `@/providers`).
+- [ ] Consistent file naming and colocated styles/types.
+
+## 15) Linting, Formatting, Build
+- [ ] `yarn lint` passes with no new errors; warnings triaged or suppressed with rationale.
+- [ ] `prettier` formatting applied.
+- [ ] App builds and starts locally without runtime errors.
+
+---
+Tip: For practice flow changes, additionally verify:
+- [ ] Practice creation resolves a valid `practiceId` and step list.
+- [ ] Navigation among steps uses the new practice path.
+- [ ] Completion updates persist and reflect in completion page.

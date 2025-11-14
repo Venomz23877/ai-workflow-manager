@@ -1,0 +1,59 @@
+---
+description: Pre-commit quality gate for NestJS/Prisma/Auth0 services; ensures CDP-216 seeding work ships production-ready.
+alwaysApply: true
+steps: |
+  1. Run the `static-analysis-checklist` rule and document findings in `.ai_working/precommit-plan.md`.
+  2. Ensure workspace hygiene: remove debug artefacts, temporary notes, and secrets; verify `.env` changes are intentional.
+  3. Execute the checks in the sections below; check off each item in your pre-commit note as you verify it.
+  4. Summarize outcomes and any follow-up tasks in `.ai_working/wrapup.md` before staging files.
+qualityChecks: |
+  TypeScript & NestJS
+  - `yarn build` passes without errors.
+  - `yarn lint` passes without warnings.
+  - Modules, services, and controllers follow NestJS conventions; imports are sorted, no unused code remains.
+  - Avoid `any`; ensure DTOs, interfaces, and enums cover the new behaviour.
+  Prisma & Database
+  - `npx prisma validate` passes and there are no pending migrations (`npx prisma migrate status`).
+  - Multi-step writes use Prisma transactions; no raw SQL unless justified and reviewed.
+  - Error handling guards against partial writes; log messages exclude sensitive data.
+securityChecks: |
+  Auth0 & API Security
+  - Protected endpoints declare appropriate guards, scopes, and validation pipes.
+  - No hardcoded credentials; new secrets documented in `.env_sample` and managed via configuration service.
+  - Inputs are validated and sanitised; responses avoid leaking implementation details.
+  - Rate limiting, throttling, and CORS settings remain appropriate for the target environment.
+testingChecks: |
+  Functional Coverage
+  - Exercise all five seeding endpoints locally; confirm idempotency and relationship integrity.
+  - Test Auth0 user provisioning, group membership, and sharing flows end-to-end with representative data.
+  - Cover error paths (invalid payloads, upstream Auth0 failures, database conflicts) and ensure graceful degradation.
+  - Run targeted unit/integration tests and update snapshots or factories as needed.
+documentationChecks: |
+  Project Docs
+  - Update Swagger decorators, README setup steps, and in-code comments for complex logic.
+  - Record new environment variables, feature flags, and operational notes.
+  - Review commit message for clarity (Conventional Commits) and note QA checklist execution.
+deploymentChecks: |
+  Release Readiness
+  - Verify configuration works for both local and production contexts (database URLs, Auth0 tenants, queues).
+  - Inspect Prisma queries for performance pitfalls (N+1, missing indices); ensure batching where required.
+  - Confirm background jobs and long-running processes manage memory and connection pooling responsibly.
+featureSpecific: |
+  CDP-216 Seeding
+  - Ensure seeding scripts are idempotent, maintain referential integrity, and cleanly handle partial retries.
+  - Validate sharing logic and practice access rules align with product requirements.
+  - Document a rollback strategy and clean-up steps should seeded data need to be removed.
+quickCommands: |
+  yarn build
+  yarn lint
+  npx prisma validate
+  npx prisma migrate status
+  yarn test <scope>   # replace <scope> with affected projects/modules
+  yarn test:e2e       # when seeding flows impact contract tests
+  rg "console\.log|debugger|TODO|FIXME" src/ --glob '!node_modules/**'
+  rg "process\.env" src/ --glob '!node_modules/**'
+notes: |
+  - Track checklist progress in `.ai_working/precommit-plan.md` and mirror key outcomes in `.ai_working/wrapup.md`.
+  - Do not commit until every section is satisfied or explicitly waived with rationale documented.
+  - Surface blocking issues immediately; never ship a short-term fix—coordinate permanent remediation per `noshorttermfixes`.
+---

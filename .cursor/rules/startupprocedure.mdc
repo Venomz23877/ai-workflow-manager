@@ -1,0 +1,16 @@
+---
+description: Session startup checklist—consume wrap-up artifacts and restore context before coding.
+alwaysApply: false
+steps: |
+  1. Open `.ai_working/wrapup.md` and the most recent session notes; extract the stated focus, blocked items, and next steps.
+  2. Review `.ai_working/lessons_learned.md` (or the latest lessons file) for guidance relevant to today’s work.
+  3. Inspect the `.ai_working/` directory for temporary files; archive or delete anything that is no longer needed so the workspace stays clean.
+  4. Sync status trackers: load the active TODO list, mark completed items, and queue actionable tasks for this session.
+  5. Re-read pertinent `.cursor/rules/*.mdc` entries to confirm all current constraints, tool expectations, and communication styles are in effect.
+  6. Note the session kickoff summary in `.ai_working/wrapup.md` (or a new dated entry) outlining today’s objectives before proceeding.
+artifacts: |
+  - `.ai_working/wrapup.md`
+  - `.ai_working/lessons_learned.md`
+  - `.ai_working/` temporary files
+  - `.cursor/rules/`
+---
