@@ -24,4 +24,15 @@ export interface ListedTestSuite extends TestSuiteDefinition {
   lastRun: TestRunResult | null
   isRunning: boolean
 }
+export interface TestRunBundleEntry {
+  suiteId: string
+  suiteName: string
+  result: TestRunResult | null
+}
+export interface TestRunBundle {
+  generatedAt: string
+  totalSuites: number
+  totalCompleted: number
+  suites: TestRunBundleEntry[]
+}
 //# sourceMappingURL=testRunnerTypes.d.ts.map

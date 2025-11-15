@@ -133,6 +133,12 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
+.run-all-group {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .btn-secondary.run-all {
   background: linear-gradient(135deg, #34d399 0%, #059669 100%);
   border: none;
@@ -140,6 +146,14 @@
 
 .btn-secondary.run-all:not(:disabled):hover {
   background: linear-gradient(135deg, #6ee7b7 0%, #10b981 100%);
+}
+
+.btn-secondary.download-all {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.btn-secondary.download-all:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .create-form {
@@ -401,6 +415,64 @@
   gap: 1rem;
 }
 
+.draft-section {
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.draft-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.draft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.draft-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.draft-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.draft-card-header h4 {
+  margin: 0;
+}
+
+.draft-card-header small {
+  color: #9ca3af;
+}
+
+.draft-updated {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.draft-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .connector-section {
   margin-top: 2rem;
   background: rgba(255, 255, 255, 0.03);
@@ -446,6 +518,65 @@
 
 .connector-card-header small {
   color: #9ca3af;
+}
+
+.document-section {
+  margin-top: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.document-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.document-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.document-form-card,
+.document-list-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.document-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.doc-meta {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.doc-path {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #a5b4fc;
+  word-break: break-all;
 }
 
 .connector-health {

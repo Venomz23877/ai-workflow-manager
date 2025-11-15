@@ -33,25 +33,26 @@
 
 ## Detailed Task Lists
 ### Workflow Runtime & Draft Service
-- [ ] Domain models/types + migrations.
-- [ ] `WorkflowDraftService` with autosave/version history.
-- [ ] ValidationService runner + error DTOs.
-- [ ] WorkflowRuntime skeleton (subscribe to ValidationService + future Scheduler).
-- [ ] IPC: `workflow:drafts:list/create/update/delete/validate`.
-- [ ] CLI: `aiwm workflow draft list|create|update|validate`.
-- [ ] Vitest suites for draft persistence + validation.
+- [x] Domain models/types + migrations.
+- [x] `WorkflowDraftService` with autosave/version history.
+- [x] ValidationService runner + error DTOs.
+- [x] WorkflowRuntime skeleton (subscribe to ValidationService + future Scheduler).
+- [x] IPC: `workflow:drafts:list/create/update/delete/validate/publish`.
+- [x] CLI: `aiwm workflow draft list|create|update|validate|publish|delete`.
+- [x] Vitest suites for draft persistence + validation + publish flow.
+- [x] Renderer draft panel (validate/publish/delete) completing designer flow requirements.
 
 ### Document & Template Services
-- [ ] DocumentRegistry schema + repository.
-- [ ] DocumentBuilder implementations (`DocxBuilder`, `PdfBuilder`, `MarkdownBuilder`).
-- [ ] Renderer document workspace integration (load/save via FileConnector).
-- [ ] CLI export command (`aiwm doc export <workflowId>`).
-- [ ] Vitest: document builder outputs, registry CRUD.
+- [x] DocumentRegistry schema + repository.
+- [x] DocumentBuilder implementations (`DocxBuilder`, `PdfBuilder`, `MarkdownBuilder`).
+- [x] Renderer document workspace integration (export via FileConnector).
+- [x] CLI export/list commands (`aiwm document ...`).
+- [x] Vitest: document builder/service outputs, registry CRUD.
 
 ### Shared / Ops
-- [ ] Update Test Console with `workflow-drafts` and `document-builders` suites once tests exist.
-- [ ] Audit logging for draft publish + document exports.
-- [ ] Docs: update architecture & implementation plan with Sprint 2 status.
+- [x] Update Test Console with `workflow-drafts`, `workflow-validation`, `document-service` suites once tests exist.
+- [x] Audit logging for document exports (draft publish logging planned alongside publish feature).
+- [x] Docs: update architecture & implementation plan with Sprint 2 status.
 
 ## Risks & Mitigations
 - **Schema churn**: lock schema before sprint ends; document migrations clearly.
@@ -59,8 +60,8 @@
 - **Runtime complexity**: keep WorkflowRuntime minimal (state transitions + logging) until validation is stable.
 
 ## Definition of Done
-- Draft designer flows can create/save/validate/publish workflows via IPC + CLI.
-- Document workspace can read/write templates and export sample DOCX/PDF.
-- New vitest suites run via `npm test` and appear in Test Console.
-- Docs (`implementation-plan.md`, `sprint-1-plan.md`) updated with completion status and Sprint 2 goals.
+- Draft designer flows can create/save/validate/publish workflows via IPC, renderer UI, and CLI. ✅
+- Document workspace can export documents (Markdown/DOCX/PDF) via renderer + CLI with registry history. ✅
+- New vitest suites (`workflow-drafts`, `workflow-validation`, `workflow-runtime`, `document-service`) run via `npm test` and appear in Test Console. ✅
+- Docs (`implementation-plan.md`, `sprint-2-plan.md`) updated with completion status and next steps. ✅
 

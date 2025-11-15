@@ -25,6 +25,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",
     "better-sqlite3": "^9.2.2",
+    "diff": "^5.2.0",
     "docx": "^9.5.1",
     "electron-updater": "^6.1.7",
     "openai": "^6.9.0",

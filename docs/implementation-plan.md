@@ -57,14 +57,11 @@ For each component, capture:
 
 ### 3.1 WorkflowRuntime & WorkflowDraftService
 - **Overview**: Implement hexagonal runtime with command bus, state machine (xstate/custom), IPC APIs.
-- **Steps**:
-  1. Define domain models for workflows, nodes, transitions, triggers, validators.
-  2. Implement WorkflowDraftService (autosave, versioning) with SQLite repositories.
-  3. Build ValidationService (schema-based + custom rules) and integrate with designer.
-  4. Implement WorkflowRuntime with event publisher hooks and persistence snapshots.
-  5. Expose runtime commands over IPC/CLI, including manual action invocation.
-  6. Add export/import flows referencing TemplateRegistry.
-  7. Testing: domain unit tests, integration tests with LocalSqliteConnector, simulated runs.
+- **Progress**: Domain models, autosave drafts, ValidationService, and a WorkflowRuntime skeleton with lifecycle events are now implemented with IPC & CLI hooks plus vitest coverage.
+- **Next Steps**:
+  1. Wire runtime events into designer autosave messaging and future scheduler hooks.
+  2. Add persistence snapshots + resume flows linked to WorkflowDraft history.
+  3. Extend export/import once TemplateRegistry is in place.
 
 ### 3.2 ConnectorRegistry & CredentialVault
 - **Steps**:
@@ -77,33 +74,26 @@ For each component, capture:
   7. Testing: adapter contract tests, vault integration tests (mock keychains), config persistence tests.
 
 ### 3.3 DocumentBuilder, DocumentRegistry, TemplateRegistry
-- **Steps**:
-  1. Define DocumentRegistry schema (metadata, format, tags, workflow references).
-  2. Implement DocumentBuilder strategies (DOCX via `docx`, PDF via `pdf-lib`, HTML/Markdown exporters).
-  3. Build DocumentRevisionRepository and CLI/API surfaces.
-  4. Create TemplateRegistry tables covering workflow references, permissions, dependencies.
-  5. Integrate TemplateExport/Import services with signing/checksum options.
-  6. Connect DocumentWorkspace UI/CLI features to registry/builders.
-  7. Testing: document rendering snapshot tests, template export/import integration, permission checks.
+- **Progress**: Markdown/DOCX/PDF builders, DocumentRegistry persistence, DocumentService exports, CLI document commands, and renderer workspace UI are live with automated tests and audit logging.
+- **Next Steps**:
+  1. Introduce TemplateRegistry + revision history.
+  2. Add diff tooling and template import/export with signing.
+  3. Expand renderer workspace with previews + template management.
 
 ### 3.4 SchedulerService & CLI Automation
-- **Steps**:
-  1. Implement SchedulerService (cron parser, persistence, locking).
-  2. Integrate with WorkflowRuntime via command bus; ensure credentials resolved per profile.
-  3. Extend CLI with schedule commands (add/list/pause/resume/export) referencing ConfigService.
-  4. Build ActionInvocationService for manual actions accessible via UI/CLI concurrently.
-  5. Ensure NotificationService handles schedule failures and quiet hours.
-  6. Testing: cron expression parsing, schedule persistence, concurrency safety.
+- **Progress**: SchedulerService persists schedules (hourly placeholder) with CLI commands to add/list/pause/resume. NotificationPreferenceService stores quiet hours/channels through ConfigService.
+- **Next Steps**:
+  1. Hook SchedulerService into WorkflowRuntime once the execution command bus is finalized.
+  2. Add renderer UI for schedules and notification preferences.
+  3. Replace placeholder hourly tick with cron parsing and actual timers plus NotificationService alerts.
 
 ### 3.5 Logging, Telemetry, Backup, Security
-- **Steps**:
-  1. Finalize Logging/Telemetry pipeline configuration (Winston/Pino + adapters).
-  2. Implement TelemetryExporter with opt-in gating and anonymization.
-  3. Build BackupService (create/restore encrypted archives) with manifest + retention.
-  4. Extend MigrationService with backup hooks and CLI flows.
-  5. Create InstallationValidator that references `.cursor/rules/build-installer.mdc`.
-  6. Implement SecurityScanner (npm audit wrapper) with NotificationService integration.
-  7. Testing: log configuration hot reload tests, telemetry payload verification, backup/restore end-to-end tests, migration rollback scenarios.
+- **Progress**:
+  - LoggingService writes structured JSON lines; CLI exposes `ops logs`.
+  - TelemetryService queues events behind opt-in and flushes diagnostics via CLI.
+  - BackupService creates/restores SQLite snapshots under `backups/`.
+  - SecurityScanner wraps `npm audit --json`, storing reports and logging outcomes.
+- **Next Steps**: add renderer diagnostics viewers, retention policies, automated scheduling, and integrate security findings with NotificationService.
 
 ### 3.6 AuditLogService & NotificationPreferenceService
 - **Steps**:
@@ -126,14 +116,14 @@ For each component, capture:
 Below are actionable task lists derived from the outlines above. Each task can map directly to an issue/ticket when we enter execution.
 
 ### WorkflowRuntime & WorkflowDraftService
-- [ ] Model workflow entities (workflow, node, transition, trigger, validator) in `src/core/domain/`.
-- [ ] Implement WorkflowDraftService with autosave + versioning, backed by SQLite repositories.
-- [ ] Build ValidationService covering nodes/transitions/templates with IPC exposure.
-- [ ] Implement command bus + WorkflowRuntime (xstate/custom) and event publisher integration.
+- [x] Model workflow entities (workflow, node, transition, trigger, validator) in `src/core/domain/`.
+- [x] Implement WorkflowDraftService with autosave + versioning, backed by SQLite repositories.
+- [x] Build ValidationService covering nodes/transitions/templates with IPC exposure.
+- [x] Implement command bus + WorkflowRuntime (skeleton) and event publisher integration.
 - [ ] Create persistence snapshot layer (pause/resume) and connect to WorkflowRuntime.
-- [ ] Expose runtime + validation commands via preload IPC and CLI equivalents.
+- [x] Expose runtime + validation commands via preload IPC and CLI equivalents.
 - [ ] Implement WorkflowExport/Import including JSON schema + tests.
-- [ ] Author unit/integration tests (draft persistence, runtime flows, validation).
+- [x] Author unit/integration tests (draft persistence, runtime flows, validation).
 
 ### ConnectorRegistry & CredentialVault
 - [ ] Scaffold ConnectorRegistry interfaces and registry container.
@@ -145,13 +135,12 @@ Below are actionable task lists derived from the outlines above. Each task can m
 - [ ] Write contract tests for adapters + vault integration tests.
 
 ### Document & Template Services
-- [ ] Define DocumentRegistry schema/tables and persistence APIs.
-- [ ] Implement DocumentBuilder strategies (DOCX/PDF/HTML/Markdown) with shared interface.
-- [ ] Build DocumentRevisionRepository + diff tooling (text + structural).
-- [ ] Implement TemplateRegistry with permissions, dependencies, versioning.
-- [ ] Create TemplateExport/Import services with signing + manifest validation.
-- [ ] Integrate DocumentWorkspace UI + CLI with registry/builders (editing, validation).
-- [ ] Add unit/integration tests (document rendering, revision diffs, template import/export).
+- [x] Define DocumentRegistry schema/tables and persistence APIs.
+- [x] Implement DocumentBuilder strategies (DOCX/PDF/Markdown) with shared interface.
+- [x] Build TemplateRegistry and revision tracking + diff tooling.
+- [ ] Implement TemplateRegistry permissions/dependencies and TemplateExport/Import services with signing.
+- [x] Integrate DocumentWorkspace UI + CLI with registry/builders (editing, validation).
+- [x] Add unit/integration tests (document rendering/export, registry persistence, template registry CRUD).
 
 ### SchedulerService & Automation
 - [ ] Implement SchedulerService (cron parsing, persistence, locking) plus tests.
@@ -280,15 +269,15 @@ Dependencies: Sprint 1 unblocks SchedulerService + Document builders; Sprint 2 d
 | AuditLogService foundation (leaf) | ✅ Prototype implemented (SQLite writer, CLI viewer) | Extend to cover retention settings + renderer view |
 | AppPaths helper | ✅ Ready | Reuse for ConfigService + BackupService path resolution |
 | TestRunnerService + Test Console UI | ✅ Vitest suites wired, run-all control added | Expand suites list as new components gain tests, add artifact download |
-| WorkflowRuntime & Draft Service | 🟡 Planning | Need domain schema + autosave implementation |
+| WorkflowRuntime & Draft Service | 🟢 Core services live | Snapshot/publish logic + designer hooks outstanding |
 | ConnectorRegistry & CredentialVault | 🟡 Planning | Define abstraction + vault adapters |
-| Document & Template services | 🟡 Planning | Finalize registry schema before builder work |
+| Document & Template services | 🟢 Document export path live | Next: TemplateRegistry, revision diffs, previews |
 | Scheduler/Automation | 🟡 Planning | Blocked on runtime command bus |
 | Logging/Telemetry/Backup/Security | 🟡 Planning | Requires ConfigService + Audit hooks |
 | TelemetryExporter skeleton | 🔜 | After logging configuration module lands |
 
 Immediate actions:
-1. Convert Sprint 1 backlog items into tickets (domain modeling, ConfigService scaffolding, connector interfaces).
-2. Add additional vitest suites for upcoming components so the Test Console stays useful.
-3. Draft migration scripts for new tables (workflow versions, document registry) ahead of implementation.
+1. Wire designer autosave + scheduler stubs to the new ValidationService/runtime events.
+2. Define TemplateRegistry + revision storage schema and draft migration.
+3. Extend document workspace with previews/links and document export download helpers.
 

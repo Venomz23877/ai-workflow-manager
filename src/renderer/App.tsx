@@ -11,9 +11,30 @@ interface ConnectorSummary {
     latencyMs?: number
   }
 }
-import React, { useState, useEffect, useCallback } from 'react'
+interface DocumentRecord {
+  id: number
+  name: string
+  type: 'docx' | 'pdf' | 'markdown'
+  path: string
+  version: number
+  updatedAt: string
+}
+
+interface WorkflowDraftRecord {
+  id: number
+  name: string
+  description: string
+  status: string
+  version: number
+  createdAt: string
+  updatedAt: string
+  nodes: unknown[]
+  transitions: unknown[]
+}
+
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import './App.css'
-import { ListedTestSuite, TestRunResult } from '../shared/testRunnerTypes'
+import { ListedTestSuite, TestRunBundle, TestRunResult } from '../shared/testRunnerTypes'
 
 interface Workflow {
   id: number
@@ -39,9 +60,21 @@ function App() {
   const [testRunResult, setTestRunResult] = useState<TestRunResult | null>(null)
   const [runningSuiteId, setRunningSuiteId] = useState<string | null>(null)
   const [testError, setTestError] = useState<string | null>(null)
+  const [isExportingAll, setIsExportingAll] = useState(false)
   const [connectors, setConnectors] = useState<ConnectorSummary[]>([])
   const [connectorLoading, setConnectorLoading] = useState(false)
   const [connectorError, setConnectorError] = useState<string | null>(null)
+  const [documents, setDocuments] = useState<DocumentRecord[]>([])
+  const [documentsLoading, setDocumentsLoading] = useState(false)
+  const [drafts, setDrafts] = useState<WorkflowDraftRecord[]>([])
+  const [draftsLoading, setDraftsLoading] = useState(false)
+  const [draftActionId, setDraftActionId] = useState<number | null>(null)
+  const [documentForm, setDocumentForm] = useState({
+    name: '',
+    format: 'markdown' as DocumentRecord['type'],
+    content: ''
+  })
+  const [isExportingDocument, setIsExportingDocument] = useState(false)
 
   const loadTestSuites = useCallback(async () => {
     try {
@@ -56,12 +89,26 @@ function App() {
     }
   }, [])
 
+  const loadDrafts = useCallback(async () => {
+    try {
+      setDraftsLoading(true)
+      const data = await window.electronAPI.listWorkflowDrafts()
+      setDrafts(data)
+    } catch (error) {
+      console.error('Failed to load drafts:', error)
+    } finally {
+      setDraftsLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     loadWorkflows()
     loadAppVersion()
     loadTestSuites()
     loadConnectors()
-  }, [loadTestSuites])
+    loadDocuments()
+    loadDrafts()
+  }, [loadTestSuites, loadDocuments, loadDrafts])
 
   useEffect(() => {
     if (!selectedSuiteId && testSuites.length > 0) {
@@ -165,6 +212,18 @@ function App() {
     }
   }
 
+  const loadDocuments = useCallback(async () => {
+    try {
+      setDocumentsLoading(true)
+      const records = await window.electronAPI.listDocuments()
+      setDocuments(records)
+    } catch (error) {
+      console.error('Failed to load documents:', error)
+    } finally {
+      setDocumentsLoading(false)
+    }
+  }, [])
+
   const handleTestConnector = async (id: string) => {
     try {
       setConnectorLoading(true)
@@ -175,6 +234,85 @@ function App() {
       setConnectorError(error instanceof Error ? error.message : 'Connector test failed')
     } finally {
       setConnectorLoading(false)
+    }
+  }
+
+  const handleDocumentFormChange = (
+    field: 'name' | 'format' | 'content',
+    value: string
+  ) => {
+    setDocumentForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleValidateDraft = async (id: number) => {
+    try {
+      setDraftActionId(id)
+      const result = await window.electronAPI.validateWorkflowDraft(id)
+      if (result.valid) {
+        alert(result.warnings.length ? `Valid with warnings:\n${result.warnings.join('\n')}` : 'Draft valid')
+      } else {
+        alert(`Draft invalid:\n${result.errors.join('\n')}`)
+      }
+    } catch (error) {
+      console.error('Failed to validate draft:', error)
+      alert('Failed to validate draft.')
+    } finally {
+      setDraftActionId(null)
+    }
+  }
+
+  const handlePublishDraft = async (id: number) => {
+    try {
+      setDraftActionId(id)
+      const result = await window.electronAPI.publishWorkflowDraft(id)
+      alert(`Published workflow #${result.workflow.id}`)
+      await loadWorkflows()
+      await loadDrafts()
+    } catch (error) {
+      console.error('Failed to publish draft:', error)
+      alert('Publish failed. Check validation errors in CLI/logs.')
+    } finally {
+      setDraftActionId(null)
+    }
+  }
+
+  const handleDeleteDraft = async (id: number) => {
+    if (!confirm('Delete this draft?')) {
+      return
+    }
+    try {
+      setDraftActionId(id)
+      await window.electronAPI.deleteWorkflowDraft(id)
+      await loadDrafts()
+    } catch (error) {
+      console.error('Failed to delete draft:', error)
+      alert('Failed to delete draft.')
+    } finally {
+      setDraftActionId(null)
+    }
+  }
+
+  const handleExportDocument = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!documentForm.name.trim() || !documentForm.content.trim()) {
+      alert('Provide a document name and content before exporting.')
+      return
+    }
+    try {
+      setIsExportingDocument(true)
+      const result = await window.electronAPI.exportDocument({
+        name: documentForm.name,
+        format: documentForm.format,
+        content: documentForm.content
+      })
+      alert(`✅ Document saved to ${result.path}`)
+      setDocumentForm({ name: '', format: documentForm.format, content: '' })
+      await loadDocuments()
+    } catch (error) {
+      console.error('Failed to export document:', error)
+      alert('Document export failed. Check logs for details.')
+    } finally {
+      setIsExportingDocument(false)
     }
   }
 
@@ -212,6 +350,32 @@ function App() {
       ? testRunResult
       : (currentSuite?.lastRun ?? null)
 
+  const canExportAllResults = useMemo(
+    () => testSuites.some((suite) => suite.lastRun !== null),
+    [testSuites]
+  )
+
+  const buildTestRunBundle = useCallback((): TestRunBundle | null => {
+    if (!testSuites.length) {
+      return null
+    }
+    const suites = testSuites.map((suite) => ({
+      suiteId: suite.id,
+      suiteName: suite.name,
+      result: suite.lastRun
+    }))
+    const totalCompleted = suites.filter((entry) => entry.result !== null).length
+    if (totalCompleted === 0) {
+      return null
+    }
+    return {
+      generatedAt: new Date().toISOString(),
+      totalSuites: suites.length,
+      totalCompleted,
+      suites
+    }
+  }, [testSuites])
+
   const formatDuration = (durationMs?: number) => {
     if (!durationMs) return '—'
     const seconds = durationMs / 1000
@@ -241,11 +405,35 @@ function App() {
   const handleExportResult = async () => {
     if (!currentResult) return
     try {
-      const { path } = await window.electronAPI.exportTestResult(currentResult)
-      alert(`✅ Test result saved to ${path}`)
+      const response = await window.electronAPI.exportTestResult(currentResult)
+      if (response.canceled || !response.path) {
+        return
+      }
+      alert(`✅ Test result saved to ${response.path}`)
     } catch (error) {
       console.error('Failed to export test result:', error)
       alert('Failed to export test result. Check logs for details.')
+    }
+  }
+
+  const handleExportAllResults = async () => {
+    const bundle = buildTestRunBundle()
+    if (!bundle) {
+      alert('Run at least one suite before exporting combined results.')
+      return
+    }
+    try {
+      setIsExportingAll(true)
+      const response = await window.electronAPI.exportAllTestResults(bundle)
+      if (response.canceled || !response.path) {
+        return
+      }
+      alert(`✅ All test results saved to ${response.path}`)
+    } catch (error) {
+      console.error('Failed to export all test results:', error)
+      alert('Failed to export all test results. Check logs for details.')
+    } finally {
+      setIsExportingAll(false)
     }
   }
 
@@ -294,6 +482,74 @@ function App() {
 
         {activeTab === 'workflows' && (
           <>
+            <section className="draft-section">
+              <div className="draft-header">
+                <div>
+                  <h3>Workflow Drafts</h3>
+                  <p>Validate and publish drafts before activating workflows.</p>
+                </div>
+                <button
+                  className="btn-secondary"
+                  type="button"
+                  onClick={loadDrafts}
+                  disabled={draftsLoading}
+                >
+                  {draftsLoading ? 'Refreshing…' : 'Refresh'}
+                </button>
+              </div>
+              {draftsLoading ? (
+                <div className="loading small">Loading drafts…</div>
+              ) : drafts.length === 0 ? (
+                <div className="empty-state compact">
+                  <p>No drafts yet. Use the CLI or API to create workflow drafts.</p>
+                </div>
+              ) : (
+                <div className="draft-grid">
+                  {drafts.map((draft) => (
+                    <div key={draft.id} className="draft-card">
+                      <div className="draft-card-header">
+                        <div>
+                          <h4>{draft.name}</h4>
+                          <small>
+                            v{draft.version} · {draft.status}
+                          </small>
+                        </div>
+                        <span className="draft-updated">
+                          Updated {new Date(draft.updatedAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="draft-actions">
+                        <button
+                          className="btn-secondary"
+                          type="button"
+                          onClick={() => handleValidateDraft(draft.id)}
+                          disabled={draftActionId === draft.id}
+                        >
+                          {draftActionId === draft.id ? 'Working…' : 'Validate'}
+                        </button>
+                        <button
+                          className="btn-secondary"
+                          type="button"
+                          onClick={() => handlePublishDraft(draft.id)}
+                          disabled={draftActionId === draft.id}
+                        >
+                          Publish
+                        </button>
+                        <button
+                          className="btn-danger"
+                          type="button"
+                          onClick={() => handleDeleteDraft(draft.id)}
+                          disabled={draftActionId === draft.id}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
             {showCreateForm && (
               <div className="create-form">
                 <h2>Create New Workflow</h2>
@@ -434,6 +690,89 @@ function App() {
                 </div>
               )}
             </section>
+
+            <section className="document-section">
+              <div className="document-header">
+                <h3>Document Workspace</h3>
+                <button
+                  className="btn-secondary"
+                  type="button"
+                  onClick={loadDocuments}
+                  disabled={documentsLoading}
+                >
+                  {documentsLoading ? 'Refreshing…' : 'Refresh'}
+                </button>
+              </div>
+              <div className="document-grid">
+                <div className="document-form-card">
+                  <h4>Export Document</h4>
+                  <form onSubmit={handleExportDocument}>
+                    <div className="form-group">
+                      <label htmlFor="doc-name">Name</label>
+                      <input
+                        id="doc-name"
+                        type="text"
+                        value={documentForm.name}
+                        onChange={(e) => handleDocumentFormChange('name', e.target.value)}
+                        placeholder="Sprint summary"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="doc-format">Format</label>
+                      <select
+                        id="doc-format"
+                        value={documentForm.format}
+                        onChange={(e) =>
+                          handleDocumentFormChange('format', e.target.value as DocumentRecord['type'])
+                        }
+                      >
+                        <option value="markdown">Markdown</option>
+                        <option value="docx">DOCX</option>
+                        <option value="pdf">PDF</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="doc-content">Content</label>
+                      <textarea
+                        id="doc-content"
+                        rows={5}
+                        value={documentForm.content}
+                        onChange={(e) => handleDocumentFormChange('content', e.target.value)}
+                        placeholder="## Release Notes..."
+                      />
+                    </div>
+                    <button className="btn-primary" type="submit" disabled={isExportingDocument}>
+                      {isExportingDocument ? 'Exporting…' : 'Export Document'}
+                    </button>
+                  </form>
+                </div>
+                <div className="document-list-card">
+                  <h4>Recent Documents</h4>
+                  {documentsLoading ? (
+                    <div className="loading small">Loading documents…</div>
+                  ) : documents.length === 0 ? (
+                    <div className="empty-state compact">
+                      <p>No documents exported yet.</p>
+                    </div>
+                  ) : (
+                    <div className="document-list">
+                      {documents.map((doc) => (
+                        <div key={doc.id} className="document-card">
+                          <div>
+                            <strong>{doc.name}</strong>
+                            <span className="doc-meta">
+                              {doc.type.toUpperCase()} · v{doc.version}
+                            </span>
+                          </div>
+                          <small>Updated: {new Date(doc.updatedAt).toLocaleString()}</small>
+                          <code className="doc-path">{doc.path}</code>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
           </>
         )}
 
@@ -488,14 +827,24 @@ function App() {
                         <p>{currentSuite.description}</p>
                       </div>
                       <div className="test-suite-actions">
-                        <button
-                          className="btn-secondary run-all"
-                          type="button"
-                          onClick={handleRunAllSuites}
-                          disabled={runningSuiteId !== null}
-                        >
-                          {runningSuiteId === 'all' ? 'Running All…' : 'Run All Suites'}
-                        </button>
+                        <div className="run-all-group">
+                          <button
+                            className="btn-secondary run-all"
+                            type="button"
+                            onClick={handleRunAllSuites}
+                            disabled={runningSuiteId !== null}
+                          >
+                            {runningSuiteId === 'all' ? 'Running All…' : 'Run All Suites'}
+                          </button>
+                          <button
+                            className="btn-secondary download-all"
+                            type="button"
+                            onClick={handleExportAllResults}
+                            disabled={!canExportAllResults || isExportingAll || runningSuiteId !== null}
+                          >
+                            {isExportingAll ? 'Saving...' : 'Download Results'}
+                          </button>
+                        </div>
                         <button
                           className="btn-secondary"
                           type="button"

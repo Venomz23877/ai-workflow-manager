@@ -1,14 +1,29 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain } from 'electron'
+import fs from 'fs'
 import path from 'path'
 import { WorkflowDatabase } from '../core/database'
 import { ConfigService } from '../core/config/service'
 import { CredentialVault } from '../core/credentials/vault'
 import { ConnectorRegistry } from '../core/connectors/registry'
-import { FileConnector } from '../core/files/fileConnector'
 import { getAppDatabasePath } from '../core/appPaths'
 import { AuditLogService } from '../core/audit-log'
 import { TestRunnerService } from './services/testRunner'
-import { TestRunResult } from '../shared/testRunnerTypes'
+import { TestRunBundle, TestRunResult } from '../shared/testRunnerTypes'
+import { FileConnector } from '../core/files/fileConnector'
+import { WorkflowDraftService } from '../core/workflows/workflowDraftService'
+import {
+  WorkflowDraftContent,
+  WorkflowDraftUpdateInput
+} from '../core/workflows/workflowTypes'
+import { ValidationService } from '../core/workflows/validationService'
+import { DocumentRegistry } from '../core/documents/documentRegistry'
+import { DocumentService, ExportDocumentPayload } from '../core/documents/documentService'
+import { WorkflowPublishService } from '../core/workflows/workflowPublishService'
+import { LoggingService } from '../core/logging/loggingService'
+import { TelemetryService } from '../core/logging/telemetryService'
+import { NotificationPreferenceService } from '../core/notifications/notificationPreferenceService'
+import { SchedulerService } from '../core/scheduler/schedulerService'
+import { TemplateRegistry } from '../core/templates/templateRegistry'
 
 let mainWindow: BrowserWindow | null = null
 let db: WorkflowDatabase
@@ -17,8 +32,39 @@ let credentialVault: CredentialVault
 let connectorRegistry: ConnectorRegistry
 let auditLog: AuditLogService | null = null
 let fileConnector: FileConnector
+let workflowDraftService: WorkflowDraftService
+let validationService: ValidationService
+let documentRegistry: DocumentRegistry
+let documentService: DocumentService
+let workflowPublishService: WorkflowPublishService
+let loggingService: LoggingService
+let telemetryService: TelemetryService
+let notificationPrefs: NotificationPreferenceService
+let schedulerService: SchedulerService
+let templateRegistry: TemplateRegistry
 const isDevelopment = process.env.NODE_ENV === 'development'
 const testRunner = new TestRunnerService()
+
+async function saveJsonWithDialog(
+  defaultFileName: string,
+  data: unknown,
+  title: string
+): Promise<{ canceled: boolean; path?: string }> {
+  const dialogOptions: Electron.SaveDialogOptions = {
+    title,
+    defaultPath: path.join(app.getPath('documents'), defaultFileName),
+    filters: [{ name: 'JSON Files', extensions: ['json'] }]
+  }
+
+  const { canceled, filePath } = mainWindow
+    ? await dialog.showSaveDialog(mainWindow, dialogOptions)
+    : await dialog.showSaveDialog(dialogOptions)
+  if (canceled || !filePath) {
+    return { canceled: true }
+  }
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8')
+  return { canceled: false, path: filePath }
+}
 
 function getPreloadPath(appBasePath: string) {
   return path.join(appBasePath, 'dist', 'preload', 'preload', 'preload.js')
@@ -73,6 +119,16 @@ app.whenReady().then(async () => {
   credentialVault = new CredentialVault()
   connectorRegistry = new ConnectorRegistry()
   fileConnector = new FileConnector()
+  validationService = new ValidationService()
+  workflowDraftService = new WorkflowDraftService(configService, dbPath, validationService)
+  documentRegistry = new DocumentRegistry(dbPath)
+  documentService = new DocumentService(documentRegistry, fileConnector)
+  workflowPublishService = new WorkflowPublishService(db, workflowDraftService, validationService)
+  loggingService = new LoggingService()
+  telemetryService = new TelemetryService(configService)
+  notificationPrefs = new NotificationPreferenceService(configService)
+  schedulerService = new SchedulerService(notificationPrefs, loggingService, dbPath)
+  templateRegistry = new TemplateRegistry(dbPath)
 
   createWindow()
 
@@ -92,6 +148,10 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
   db?.close()
   auditLog?.close()
+  workflowDraftService?.close()
+  documentRegistry?.close()
+  schedulerService?.close()
+  templateRegistry?.close()
 })
 
 // IPC Handlers
@@ -162,9 +222,12 @@ ipcMain.handle('connectors:test', async (_, id: string) => {
 
 ipcMain.handle('test-results:export', async (_, result: TestRunResult) => {
   const fileName = `test-result-${result.suiteId}-${Date.now()}.json`
-  const relativePath = path.join('test-results', fileName)
-  const fullPath = fileConnector.writeFile(relativePath, JSON.stringify(result, null, 2))
-  return { path: fullPath }
+  return saveJsonWithDialog(fileName, result, 'Save Test Result')
+})
+
+ipcMain.handle('test-results:export-batch', async (_, bundle: TestRunBundle) => {
+  const fileName = `test-run-${Date.now()}.json`
+  return saveJsonWithDialog(fileName, bundle, 'Save Test Results')
 })
 
 ipcMain.handle('config:get', (_, targetPath: string) => {
@@ -179,6 +242,103 @@ ipcMain.handle('config:set', async (_, targetPath: string, value: unknown) => {
 ipcMain.handle('config:list-sections', () => {
   return configService.listSections()
 })
+
+ipcMain.handle('workflow-drafts:list', () => workflowDraftService.listDrafts())
+
+ipcMain.handle('workflow-drafts:get', (_, id: number) => workflowDraftService.getDraft(id) ?? null)
+
+ipcMain.handle('workflow-drafts:create', (_, payload: { name: string; description?: string }) => {
+  if (!payload.name?.trim()) {
+    throw new Error('Draft name is required')
+  }
+  return workflowDraftService.createDraft(payload.name.trim(), payload.description)
+})
+
+ipcMain.handle(
+  'workflow-drafts:update',
+  (_, id: number, input: WorkflowDraftUpdateInput) => workflowDraftService.updateDraft(id, input)
+)
+
+ipcMain.handle('workflow-drafts:autosave', (_, id: number, content: WorkflowDraftContent) =>
+  workflowDraftService.autosaveDraft(id, content)
+)
+
+ipcMain.handle('workflow-drafts:delete', (_, id: number) => {
+  workflowDraftService.deleteDraft(id)
+  return { success: true }
+})
+
+ipcMain.handle('workflow-drafts:validate', (_, id: number) => workflowDraftService.validateDraft(id))
+
+ipcMain.handle('workflow-drafts:publish', (_, id: number) => {
+  const result = workflowPublishService.publishDraft(id)
+  loggingService.log({
+    category: 'workflow',
+    action: 'publish',
+    metadata: { draftId: id, workflowId: result.workflow.id }
+  })
+  telemetryService.enqueue({
+    type: 'workflow.publish',
+    payload: { workflowId: result.workflow.id }
+  })
+  return result
+})
+
+ipcMain.handle('documents:list', () => documentService.listDocuments())
+
+ipcMain.handle('documents:export', async (_, payload: ExportDocumentPayload) => {
+  const result = await documentService.exportDocument(payload)
+  auditLog?.logEvent({
+    actor: 'renderer',
+    source: 'document-service',
+    action: 'document.export',
+    target: `document:${result.record.id}`,
+    metadata: {
+      name: result.record.name,
+      type: result.record.type,
+      path: result.path
+    }
+  })
+  loggingService.log({
+    category: 'documents',
+    action: 'export',
+    metadata: { documentId: result.record.id, format: result.record.type }
+  })
+  telemetryService.enqueue({
+    type: 'document.export',
+    payload: { format: result.record.type }
+  })
+  return result
+})
+
+ipcMain.handle('notifications:get-preferences', () => notificationPrefs.getPreferences())
+
+ipcMain.handle('notifications:set-preferences', (_, prefs) => {
+  notificationPrefs.savePreferences(prefs)
+  return notificationPrefs.getPreferences()
+})
+
+ipcMain.handle('scheduler:add', (_, workflowId: number, cron: string) =>
+  schedulerService.addSchedule(workflowId, cron)
+)
+
+ipcMain.handle('scheduler:list', () => schedulerService.list())
+
+ipcMain.handle('scheduler:pause', (_, id: number) => {
+  schedulerService.pause(id)
+  return { success: true }
+})
+
+ipcMain.handle('scheduler:resume', (_, id: number) => {
+  schedulerService.resume(id)
+  return { success: true }
+})
+
+ipcMain.handle('templates:create', (_, payload) => templateRegistry.createTemplate(payload))
+ipcMain.handle('templates:list', () => templateRegistry.listTemplates())
+ipcMain.handle('templates:revisions', (_, templateId: number) =>
+  templateRegistry.listRevisions(templateId)
+)
 
 ipcMain.handle('list-test-suites', () => {
   return testRunner.listSuites()

@@ -6,7 +6,7 @@
     "outDir": "./dist/main",
     "jsx": "preserve"
   },
-  "include": ["src/main/**/*", "src/core/**/*"],
+  "include": ["src/main/**/*", "src/core/**/*", "src/types/**/*"],
   "exclude": ["node_modules", "dist"]
 }
 

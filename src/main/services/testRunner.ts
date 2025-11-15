@@ -10,12 +10,12 @@ const SUITES: TestSuiteDefinition[] = [
   {
     id: 'workflow-runtime',
     name: 'Workflow Runtime Smoke',
-    description: 'Runs vitest suite verifying Workflow Runtime mocks and TestRunner orchestration.',
-    tags: ['runtime', 'tests'],
-    steps: ['Launch vitest CLI', 'Execute testRunnerService suite', 'Collect vitest results'],
+    description: 'Executes runtime lifecycle tests for start/pause/resume/complete hooks.',
+    tags: ['runtime', 'workflows'],
+    steps: ['Launch vitest CLI', 'Execute workflowRuntime suite', 'Collect vitest results'],
     estimatedDurationMs: 2000,
     command: 'npm',
-    args: ['run', 'test', '--', 'src/__tests__/testRunnerService.test.ts']
+    args: ['run', 'test', '--', 'src/__tests__/workflowRuntime.test.ts']
   },
   {
     id: 'storage-paths',
@@ -41,6 +41,66 @@ const SUITES: TestSuiteDefinition[] = [
     estimatedDurationMs: 2000,
     command: 'npm',
     args: ['run', 'test', '--', 'src/__tests__/configService.test.ts']
+  },
+  {
+    id: 'workflow-validation',
+    name: 'Workflow Validation Rules',
+    description: 'Ensures ValidationService rules catch schema and link issues.',
+    tags: ['workflows', 'validation'],
+    steps: ['Launch vitest CLI', 'Execute validationService suite', 'Aggregate warnings/errors'],
+    estimatedDurationMs: 2000,
+    command: 'npm',
+    args: ['run', 'test', '--', 'src/__tests__/validationService.test.ts']
+  },
+  {
+    id: 'workflow-drafts',
+    name: 'Workflow Draft Service',
+    description: 'Validates draft CRUD, autosave, and validation rules.',
+    tags: ['workflows', 'drafts'],
+    steps: ['Launch vitest CLI', 'Execute workflowDraftService suite', 'Report validation issues'],
+    estimatedDurationMs: 2000,
+    command: 'npm',
+    args: ['run', 'test', '--', 'src/__tests__/workflowDraftService.test.ts']
+  },
+  {
+    id: 'document-service',
+    name: 'Document Service Export',
+    description: 'Runs document service tests to verify exports and registry storage.',
+    tags: ['documents', 'export'],
+    steps: ['Launch vitest CLI', 'Execute documentService suite', 'Verify outputs'],
+    estimatedDurationMs: 2000,
+    command: 'npm',
+    args: ['run', 'test', '--', 'src/__tests__/documentService.test.ts']
+  },
+  {
+    id: 'logging-service',
+    name: 'Logging Service',
+    description: 'Ensures logging service writes structured JSON lines.',
+    tags: ['ops', 'logging'],
+    steps: ['Launch vitest CLI', 'Execute loggingService suite'],
+    estimatedDurationMs: 2000,
+    command: 'npm',
+    args: ['run', 'test', '--', 'src/__tests__/loggingService.test.ts']
+  },
+  {
+    id: 'scheduler-service',
+    name: 'Scheduler Service',
+    description: 'Validates scheduler add/list persistence.',
+    tags: ['ops', 'automation'],
+    steps: ['Launch vitest CLI', 'Execute schedulerService suite'],
+    estimatedDurationMs: 2000,
+    command: 'npm',
+    args: ['run', 'test', '--', 'src/__tests__/schedulerService.test.ts']
+  },
+  {
+    id: 'template-registry',
+    name: 'Template Registry',
+    description: 'CRUD + revision tracking for templates.',
+    tags: ['templates', 'documents'],
+    steps: ['Launch vitest CLI', 'Execute templateRegistry suite'],
+    estimatedDurationMs: 2000,
+    command: 'npm',
+    args: ['run', 'test', '--', 'src/__tests__/templateRegistry.test.ts']
   }
 ]
 

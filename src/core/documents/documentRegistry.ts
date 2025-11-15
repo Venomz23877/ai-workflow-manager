@@ -33,7 +33,7 @@ export class DocumentRegistry {
 
   list(): DocumentRecord[] {
     const stmt = this.db.prepare(`SELECT * FROM document_registry ORDER BY updated_at DESC`)
-    return stmt.all() as DocumentRecord[]
+    return (stmt.all() as any[]).map((row) => this.mapRow(row))
   }
 
   add(doc: Omit<DocumentRecord, 'id' | 'updatedAt'>): DocumentRecord {
@@ -47,6 +47,22 @@ export class DocumentRegistry {
 
   get(id: number): DocumentRecord | undefined {
     const stmt = this.db.prepare(`SELECT * FROM document_registry WHERE id = ?`)
-    return stmt.get(id) as DocumentRecord | undefined
+    const row = stmt.get(id)
+    return row ? this.mapRow(row) : undefined
+  }
+
+  close(): void {
+    this.db.close()
+  }
+
+  private mapRow(row: any): DocumentRecord {
+    return {
+      id: row.id,
+      name: row.name,
+      type: row.type,
+      path: row.path,
+      version: row.version ?? 1,
+      updatedAt: row.updated_at
+    }
   }
 }

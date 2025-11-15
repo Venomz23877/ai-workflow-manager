@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3'
+import { WorkflowDraftContent } from './workflows/workflowTypes'
 
 export interface Workflow {
   id: number
@@ -7,6 +8,14 @@ export interface Workflow {
   status: 'draft' | 'active' | 'paused' | 'completed'
   created_at: string
   updated_at: string
+}
+
+export interface WorkflowVersion {
+  id: number
+  workflow_id: number
+  version: number
+  definition_json: string
+  created_at: string
 }
 
 export class WorkflowDatabase {
@@ -27,6 +36,17 @@ export class WorkflowDatabase {
         status TEXT DEFAULT 'draft',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS workflow_versions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        workflow_id INTEGER NOT NULL,
+        version INTEGER NOT NULL,
+        definition_json TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (workflow_id) REFERENCES workflows (id) ON DELETE CASCADE
       )
     `)
 
@@ -114,6 +134,31 @@ export class WorkflowDatabase {
   deleteWorkflow(id: number): void {
     const stmt = this.db.prepare('DELETE FROM workflows WHERE id = ?')
     stmt.run(id)
+  }
+
+  createWorkflowVersion(
+    workflowId: number,
+    version: number,
+    definition: WorkflowDraftContent
+  ): WorkflowVersion {
+    const stmt = this.db.prepare(`
+      INSERT INTO workflow_versions (workflow_id, version, definition_json)
+      VALUES (?, ?, ?)
+    `)
+    const info = stmt.run(workflowId, version, JSON.stringify(definition))
+    return this.getWorkflowVersion(info.lastInsertRowid as number)!
+  }
+
+  getWorkflowVersion(id: number): WorkflowVersion | undefined {
+    const stmt = this.db.prepare('SELECT * FROM workflow_versions WHERE id = ?')
+    return stmt.get(id) as WorkflowVersion | undefined
+  }
+
+  listWorkflowVersions(workflowId: number): WorkflowVersion[] {
+    const stmt = this.db.prepare(
+      'SELECT * FROM workflow_versions WHERE workflow_id = ? ORDER BY version DESC'
+    )
+    return stmt.all(workflowId) as WorkflowVersion[]
   }
 
   close(): void {
