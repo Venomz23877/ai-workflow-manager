@@ -144,6 +144,10 @@ const mergeConfig = (base: ConfigData, incoming: Partial<ConfigData>): ConfigDat
     storage: {
       ...base.connectors.storage,
       ...(incoming.connectors?.storage ?? {})
+    },
+    registry: {
+      ...base.connectors.registry,
+      ...(incoming.connectors?.registry ?? {})
     }
   },
   credentials: {
@@ -175,6 +179,42 @@ const mergeConfig = (base: ConfigData, incoming: Partial<ConfigData>): ConfigDat
     ...base.fileSandbox,
     ...(incoming.fileSandbox ?? {}),
     allowlist: incoming.fileSandbox?.allowlist ?? base.fileSandbox.allowlist
+  },
+  notifications: {
+    preferences: {
+      ...base.notifications.preferences,
+      ...(incoming.notifications?.preferences ?? {}),
+      quietHours: {
+        ...base.notifications.preferences.quietHours,
+        ...(incoming.notifications?.preferences?.quietHours ?? {})
+      },
+      channels:
+        incoming.notifications?.preferences?.channels ?? base.notifications.preferences.channels
+    }
+  },
+  diagnostics: {
+    rendererPanels: {
+      ...base.diagnostics.rendererPanels,
+      ...(incoming.diagnostics?.rendererPanels ?? {})
+    }
+  },
+  retention: {
+    logs: {
+      ...base.retention.logs,
+      ...(incoming.retention?.logs ?? {})
+    },
+    telemetry: {
+      ...base.retention.telemetry,
+      ...(incoming.retention?.telemetry ?? {})
+    },
+    backups: {
+      ...base.retention.backups,
+      ...(incoming.retention?.backups ?? {})
+    },
+    securityScans: {
+      ...base.retention.securityScans,
+      ...(incoming.retention?.securityScans ?? {})
+    }
   }
 })
 

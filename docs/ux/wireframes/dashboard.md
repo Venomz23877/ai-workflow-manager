@@ -36,4 +36,3 @@
 ## References
 
 - `docs/ux/narratives/dashboard.md`
-

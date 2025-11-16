@@ -1,7 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { ListedTestSuite, TestRunResult, TestRunBundle } from '../shared/testRunnerTypes'
 import { Workflow } from '../core/database'
-import { ConnectorSummary, HealthCheckResult } from '../core/connectors/types'
+import {
+  ConnectorSummary,
+  HealthCheckResult,
+  ManagedConnectorDefinition
+} from '../core/connectors/types'
 import {
   WorkflowDraft,
   WorkflowDraftContent,
@@ -10,7 +14,7 @@ import {
 } from '../core/workflows/workflowTypes'
 import { DocumentRecord } from '../core/documents/documentRegistry'
 import { ExportDocumentPayload } from '../core/documents/documentService'
-import { NotificationPreferences } from '../core/notifications/notificationPreferenceService'
+import { NotificationPreferences } from '../core/notifications/types'
 import { ScheduleRecord } from '../core/scheduler/schedulerService'
 import { TemplateRecord } from '../core/templates/templateRegistry'
 
@@ -40,12 +44,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('connectors:details', id),
   testConnector: (id: string): Promise<HealthCheckResult> =>
     ipcRenderer.invoke('connectors:test', id),
+  registerConnector: (definition: ManagedConnectorDefinition) =>
+    ipcRenderer.invoke('connectors:register', definition),
+  removeConnector: (id: string) => ipcRenderer.invoke('connectors:remove', id),
 
   // Config
   getConfigValue: (path: string): Promise<unknown> => ipcRenderer.invoke('config:get', path),
   setConfigValue: (path: string, value: unknown): Promise<{ success: boolean }> =>
     ipcRenderer.invoke('config:set', path, value),
   listConfigSections: (): Promise<string[]> => ipcRenderer.invoke('config:list-sections'),
+  getLogPath: () => ipcRenderer.invoke('logging:get-path'),
+  getTelemetryEnabled: () => ipcRenderer.invoke('telemetry:get-enabled'),
+  setTelemetryEnabled: (enabled: boolean) => ipcRenderer.invoke('telemetry:set-enabled', enabled),
 
   // Test results export
   exportTestResult: (result: TestRunResult): Promise<{ path?: string; canceled: boolean }> =>
@@ -71,16 +81,22 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Documents
   listDocuments: (): Promise<DocumentRecord[]> => ipcRenderer.invoke('documents:list'),
-  exportDocument: (payload: ExportDocumentPayload) => ipcRenderer.invoke('documents:export', payload),
+  exportDocument: (payload: ExportDocumentPayload) =>
+    ipcRenderer.invoke('documents:export', payload),
 
   // Notifications & Scheduler
   getNotificationPreferences: () => ipcRenderer.invoke('notifications:get-preferences'),
   setNotificationPreferences: (prefs: NotificationPreferences) =>
     ipcRenderer.invoke('notifications:set-preferences', prefs),
-  addSchedule: (workflowId: number, cron: string) => ipcRenderer.invoke('scheduler:add', workflowId, cron),
+  addSchedule: (
+    workflowId: number,
+    cron: string,
+    options?: { timezone?: string; profile?: string }
+  ) => ipcRenderer.invoke('scheduler:add', workflowId, cron, options),
   listSchedules: () => ipcRenderer.invoke('scheduler:list'),
   pauseSchedule: (id: number) => ipcRenderer.invoke('scheduler:pause', id),
   resumeSchedule: (id: number) => ipcRenderer.invoke('scheduler:resume', id),
+  deleteSchedule: (id: number) => ipcRenderer.invoke('scheduler:delete', id),
   createTemplate: (payload: {
     name: string
     description?: string
@@ -88,7 +104,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     workflowVersionId?: number
   }) => ipcRenderer.invoke('templates:create', payload),
   listTemplates: () => ipcRenderer.invoke('templates:list'),
-  listTemplateRevisions: (templateId: number) => ipcRenderer.invoke('templates:revisions', templateId)
+  listTemplateRevisions: (templateId: number) =>
+    ipcRenderer.invoke('templates:revisions', templateId)
 })
 
 // Type definitions for TypeScript
@@ -107,9 +124,14 @@ export type ElectronAPI = {
   listConnectors: () => Promise<ConnectorSummary[]>
   getConnectorDetails: (id: string) => Promise<ConnectorSummary | null>
   testConnector: (id: string) => Promise<HealthCheckResult>
+  registerConnector: (definition: ManagedConnectorDefinition) => Promise<ConnectorSummary>
+  removeConnector: (id: string) => Promise<{ success: boolean }>
   getConfigValue: (path: string) => Promise<unknown>
   setConfigValue: (path: string, value: unknown) => Promise<{ success: boolean }>
   listConfigSections: () => Promise<string[]>
+  getLogPath: () => Promise<string>
+  getTelemetryEnabled: () => Promise<boolean>
+  setTelemetryEnabled: (enabled: boolean) => Promise<boolean>
   exportTestResult: (result: TestRunResult) => Promise<{ path?: string; canceled: boolean }>
   exportAllTestResults: (bundle: TestRunBundle) => Promise<{ path?: string; canceled: boolean }>
   listWorkflowDrafts: () => Promise<WorkflowDraft[]>
@@ -121,16 +143,26 @@ export type ElectronAPI = {
   validateWorkflowDraft: (id: number) => Promise<WorkflowDraftValidationResult>
   publishWorkflowDraft: (id: number) => Promise<{ workflow: Workflow; draft: WorkflowDraft }>
   listDocuments: () => Promise<DocumentRecord[]>
-  exportDocument: (payload: ExportDocumentPayload) => Promise<{ path: string; record: DocumentRecord }>
+  exportDocument: (
+    payload: ExportDocumentPayload
+  ) => Promise<{ path: string; record: DocumentRecord }>
   getNotificationPreferences: () => Promise<NotificationPreferences>
   setNotificationPreferences: (prefs: NotificationPreferences) => Promise<NotificationPreferences>
-  addSchedule: (workflowId: number, cron: string) => Promise<ScheduleRecord>
+  addSchedule: (
+    workflowId: number,
+    cron: string,
+    options?: { timezone?: string; profile?: string }
+  ) => Promise<ScheduleRecord>
   listSchedules: () => Promise<ScheduleRecord[]>
   pauseSchedule: (id: number) => Promise<{ success: boolean }>
   resumeSchedule: (id: number) => Promise<{ success: boolean }>
-  createTemplate: (
-    payload: { name: string; description?: string; documentPath?: string; workflowVersionId?: number }
-  ) => Promise<TemplateRecord>
+  deleteSchedule: (id: number) => Promise<{ success: boolean }>
+  createTemplate: (payload: {
+    name: string
+    description?: string
+    documentPath?: string
+    workflowVersionId?: number
+  }) => Promise<TemplateRecord>
   listTemplates: () => Promise<TemplateRecord[]>
   listTemplateRevisions: (templateId: number) => Promise<any[]>
 }

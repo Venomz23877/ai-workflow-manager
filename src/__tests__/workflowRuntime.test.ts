@@ -11,12 +11,12 @@ const createDraft = (overrides: Partial<WorkflowDraft> = {}): WorkflowDraft => (
   version: overrides.version ?? 1,
   createdAt: overrides.createdAt ?? new Date().toISOString(),
   updatedAt: overrides.updatedAt ?? new Date().toISOString(),
-  nodes:
-    overrides.nodes ??
-    [{ id: 'start', type: 'start', label: 'Start', entryActions: [], exitActions: [] }],
-  transitions:
-    overrides.transitions ??
-    [{ id: 't1', source: 'start', target: 'start', trigger: undefined, validators: [] }]
+  nodes: overrides.nodes ?? [
+    { id: 'start', type: 'start', label: 'Start', entryActions: [], exitActions: [] }
+  ],
+  transitions: overrides.transitions ?? [
+    { id: 't1', source: 'start', target: 'start', trigger: undefined, validators: [] }
+  ]
 })
 
 describe('WorkflowRuntime', () => {
@@ -47,4 +47,3 @@ describe('WorkflowRuntime', () => {
     expect(completed.status).toBe('completed')
   })
 })
-

@@ -48,4 +48,3 @@ Then settings remain per-user (tied to profile) and audit logs track changes
 - CLI command should support `--json` export/import of preferences.
 - Need default baseline (critical alerts always on).
 - Open questions: How do we handle org-level defaults?
-

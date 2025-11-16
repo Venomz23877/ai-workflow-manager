@@ -12,7 +12,10 @@ export interface SecurityScanResult {
 export class SecurityScanner {
   private reportsDir: string
 
-  constructor(private loggingService: LoggingService, baseDir: string = getAppDataDir()) {
+  constructor(
+    private loggingService: LoggingService,
+    baseDir: string = getAppDataDir()
+  ) {
     this.reportsDir = path.join(baseDir, 'security')
     if (!fs.existsSync(this.reportsDir)) {
       fs.mkdirSync(this.reportsDir, { recursive: true })
@@ -24,8 +27,11 @@ export class SecurityScanner {
     const filePath = path.join(this.reportsDir, `report-${Date.now()}.json`)
     fs.writeFileSync(filePath, result.stdout || '{}', 'utf-8')
     const status = result.status === 0 ? 'passed' : 'issues-found'
-    this.loggingService.log({ category: 'security', action: 'scan', metadata: { status, filePath } })
+    this.loggingService.log({
+      category: 'security',
+      action: 'scan',
+      metadata: { status, filePath }
+    })
     return { outputPath: filePath, status }
   }
 }
-

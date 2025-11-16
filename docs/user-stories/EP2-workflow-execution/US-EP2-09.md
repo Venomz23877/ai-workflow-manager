@@ -48,4 +48,3 @@ Then the system redacts secrets and notes redactions in metadata
 - Provide schema definition for log events (timestamp, level, node, payload, correlation ID).
 - Support gzip compression via `--compress`.
 - Open questions: do we integrate with external sinks (e.g., HTTP webhook) in v1?
-

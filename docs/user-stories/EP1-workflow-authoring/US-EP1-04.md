@@ -50,4 +50,3 @@ Then the validation summary lists the offending transition and blocks publishing
 - Open questions:
   - Do we support time-based triggers (cron) in v1 or mark as future?
   - How are custom validator scripts packaged and versioned?
-

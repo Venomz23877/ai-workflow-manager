@@ -5,6 +5,7 @@ This document captures the planned implementation approach for each major archit
 ## 1. Component Inventory
 
 ### Workflow Authoring & Runtime
+
 - WorkflowRuntime (state machine, command bus)
 - WorkflowDraftService
 - WorkflowRepository / WorkflowVersionRepository
@@ -13,6 +14,7 @@ This document captures the planned implementation approach for each major archit
 - WorkflowExportService / WorkflowImportService
 
 ### Connectors & Credentials
+
 - ConnectorRegistry (storage, LLM, file, document adapters)
 - CredentialVault (keychain adapters, fallback encrypted store)
 - ConfigService (connector selections, profiles, notification prefs)
@@ -20,6 +22,7 @@ This document captures the planned implementation approach for each major archit
 - FileSandboxGuard
 
 ### Document & Template Management
+
 - DocumentBuilder strategies (DOCX, PDF, HTML, Markdown)
 - DocumentRegistry (templates + standalone docs)
 - DocumentRevisionRepository
@@ -28,12 +31,14 @@ This document captures the planned implementation approach for each major archit
 - DocumentWorkspace renderer module (editors, previews)
 
 ### Automation & Scheduling
+
 - CLI command suite (workflows, connectors, documents, ops)
 - SchedulerService (cron jobs, schedule storage)
 - ActionInvocationService (shared UI/CLI manual actions)
 - WorkflowDiffService (templates vs workflows)
 
 ### Operations, Logging, & Telemetry
+
 - Logging/Telemetry pipeline (WorkflowEventPublisher adapters, log sinks)
 - TelemetryExporter (optional remote metrics)
 - BackupService (create/restore archives)
@@ -45,6 +50,7 @@ This document captures the planned implementation approach for each major archit
 ## 2. Implementation Plan Template
 
 For each component, capture:
+
 1. **Overview & Responsibilities** — summary and key inputs/outputs.
 2. **Interfaces & Data Contracts** — main TypeScript interfaces, schema references, event payloads.
 3. **Dependencies** — other components/services required (per inventory above).
@@ -56,6 +62,7 @@ For each component, capture:
 ## 3. Component Implementation Outlines
 
 ### 3.1 WorkflowRuntime & WorkflowDraftService
+
 - **Overview**: Implement hexagonal runtime with command bus, state machine (xstate/custom), IPC APIs.
 - **Progress**: Domain models, autosave drafts, ValidationService, and a WorkflowRuntime skeleton with lifecycle events are now implemented with IPC & CLI hooks plus vitest coverage.
 - **Next Steps**:
@@ -64,6 +71,7 @@ For each component, capture:
   3. Extend export/import once TemplateRegistry is in place.
 
 ### 3.2 ConnectorRegistry & CredentialVault
+
 - **Steps**:
   1. Scaffold registry interfaces for storage, LLM, file, document connectors.
   2. Implement adapter factory pattern + registration API.
@@ -74,6 +82,7 @@ For each component, capture:
   7. Testing: adapter contract tests, vault integration tests (mock keychains), config persistence tests.
 
 ### 3.3 DocumentBuilder, DocumentRegistry, TemplateRegistry
+
 - **Progress**: Markdown/DOCX/PDF builders, DocumentRegistry persistence, DocumentService exports, CLI document commands, and renderer workspace UI are live with automated tests and audit logging.
 - **Next Steps**:
   1. Introduce TemplateRegistry + revision history.
@@ -81,6 +90,7 @@ For each component, capture:
   3. Expand renderer workspace with previews + template management.
 
 ### 3.4 SchedulerService & CLI Automation
+
 - **Progress**: SchedulerService persists schedules (hourly placeholder) with CLI commands to add/list/pause/resume. NotificationPreferenceService stores quiet hours/channels through ConfigService.
 - **Next Steps**:
   1. Hook SchedulerService into WorkflowRuntime once the execution command bus is finalized.
@@ -88,6 +98,7 @@ For each component, capture:
   3. Replace placeholder hourly tick with cron parsing and actual timers plus NotificationService alerts.
 
 ### 3.5 Logging, Telemetry, Backup, Security
+
 - **Progress**:
   - LoggingService writes structured JSON lines; CLI exposes `ops logs`.
   - TelemetryService queues events behind opt-in and flushes diagnostics via CLI.
@@ -96,6 +107,7 @@ For each component, capture:
 - **Next Steps**: add renderer diagnostics viewers, retention policies, automated scheduling, and integrate security findings with NotificationService.
 
 ### 3.6 AuditLogService & NotificationPreferenceService
+
 - **Steps**:
   1. Define audit log schema (append-only table, event types, metadata).
   2. Implement API for CRUD/read operations accessible via UI/CLI.
@@ -116,6 +128,7 @@ For each component, capture:
 Below are actionable task lists derived from the outlines above. Each task can map directly to an issue/ticket when we enter execution.
 
 ### WorkflowRuntime & WorkflowDraftService
+
 - [x] Model workflow entities (workflow, node, transition, trigger, validator) in `src/core/domain/`.
 - [x] Implement WorkflowDraftService with autosave + versioning, backed by SQLite repositories.
 - [x] Build ValidationService covering nodes/transitions/templates with IPC exposure.
@@ -126,6 +139,7 @@ Below are actionable task lists derived from the outlines above. Each task can m
 - [x] Author unit/integration tests (draft persistence, runtime flows, validation).
 
 ### ConnectorRegistry & CredentialVault
+
 - [ ] Scaffold ConnectorRegistry interfaces and registry container.
 - [ ] Implement adapter factories for storage/LLM/file/document connectors.
 - [ ] Build CredentialVault adapters (Win/Mac/Linux/fallback) with abstraction layer.
@@ -135,6 +149,7 @@ Below are actionable task lists derived from the outlines above. Each task can m
 - [ ] Write contract tests for adapters + vault integration tests.
 
 ### Document & Template Services
+
 - [x] Define DocumentRegistry schema/tables and persistence APIs.
 - [x] Implement DocumentBuilder strategies (DOCX/PDF/Markdown) with shared interface.
 - [x] Build TemplateRegistry and revision tracking + diff tooling.
@@ -143,6 +158,7 @@ Below are actionable task lists derived from the outlines above. Each task can m
 - [x] Add unit/integration tests (document rendering/export, registry persistence, template registry CRUD).
 
 ### SchedulerService & Automation
+
 - [ ] Implement SchedulerService (cron parsing, persistence, locking) plus tests.
 - [ ] Integrate SchedulerService with WorkflowRuntime command bus and profiles.
 - [ ] Build CLI scheduling commands (add/list/pause/resume/export).
@@ -151,6 +167,7 @@ Below are actionable task lists derived from the outlines above. Each task can m
 - [ ] Add end-to-end tests for scheduled runs and manual action invocation.
 
 ### Logging, Telemetry, Backup, Security
+
 - [ ] Implement logging configuration module with runtime hot reload + file/webhook destinations.
 - [ ] Build TelemetryExporter with opt-in gating, anonymization, preview payload tooling.
 - [ ] Create BackupService (create/restore encrypted archives) and integrate with settings/CLI.
@@ -160,6 +177,7 @@ Below are actionable task lists derived from the outlines above. Each task can m
 - [ ] Write automated tests for logging config changes, telemetry payloads, backup/restore cycles, migration rollback, security scan parsing.
 
 ### Audit & Notification Preferences
+
 - [ ] Define AuditLogService schema and append-only writer.
 - [ ] Expose audit read/tail APIs for UI + CLI.
 - [ ] Instrument all sensitive flows (connectors, templates, backups, exports) to log events.
@@ -172,6 +190,7 @@ Below are actionable task lists derived from the outlines above. Each task can m
 These components have minimal upstream dependencies and can be built immediately to unblock the rest of the system. For each, we capture scope, milestones, and immediate tasks.
 
 ### 6.1 AuditLogService
+
 - **Scope**: Append-only audit log storage (SQLite table), write API, read/tail API (UI + CLI), retention/rotation settings.
 - **Milestones**:
   1. Schema migration (`audit_logs` table: id, timestamp, actor, action, metadata JSON).
@@ -186,6 +205,7 @@ These components have minimal upstream dependencies and can be built immediately
   - Add Jest tests for insert/query/retention.
 
 ### 6.2 FileSandboxGuard & FileConnector (Local)
+
 - **Scope**: Enforce allowed directories list and wrap filesystem operations for DocumentBuilder/CLI.
 - **Milestones**:
   1. Define config schema (`fileSandbox.allowlist` with read/write flags).
@@ -199,6 +219,7 @@ These components have minimal upstream dependencies and can be built immediately
   - Write unit tests mocking filesystem + config.
 
 ### 6.3 DocumentBuilder Strategies
+
 - **Scope**: DOCX (docx), PDF (pdf-lib), HTML/Markdown exporters with consistent interface.
 - **Milestones**:
   1. Define `DocumentBuilder` interface and base types (content sections, metadata).
@@ -213,6 +234,7 @@ These components have minimal upstream dependencies and can be built immediately
   - Add CLI/test harness for manual verification of outputs.
 
 ### 6.4 DocumentRevisionRepository
+
 - **Scope**: Store document revisions, provide diff/capabilities for UI/CLI.
 - **Milestones**:
   1. Schema migration for `document_revisions` table storing compressed blobs + metadata.
@@ -226,6 +248,7 @@ These components have minimal upstream dependencies and can be built immediately
   - Add CLI stubs + tests.
 
 ### 6.5 SecurityScanner Wrapper
+
 - **Scope**: Wrap `npm audit`/advisory APIs, parse results, store reports.
 - **Milestones**:
   1. CLI command `aiwm ops security scan`.
@@ -239,6 +262,7 @@ These components have minimal upstream dependencies and can be built immediately
   - Add tests using fixture audit outputs.
 
 ### 6.6 TelemetryExporter Skeleton
+
 - **Scope**: Handle telemetry opt-in, buffering, anonymization, manual diagnostic upload.
 - **Milestones**:
   1. Define telemetry config schema (enabled flag, endpoint, privacy statement).
@@ -253,31 +277,31 @@ These components have minimal upstream dependencies and can be built immediately
 
 ## 7. Execution Timeline & Resource Plan
 
-| Phase | Scope Highlights | Primary Owners | Target Duration | Exit Criteria |
-|-------|------------------|----------------|-----------------|---------------|
-| Sprint 0 | Leaf components (AuditLogService foundation, AppPaths helper, TestRunnerService + UI wiring) | Platform Enablement | 1 week | CLI + renderer demos working, vitest suites green |
-| Sprint 1 | WorkflowRuntime/DraftService scaffolding, ConnectorRegistry contracts, ConfigService foundations | Core Runtime + Integration | 2–3 weeks | Domain models published, draft persistence + validation APIs available |
-| Sprint 2 | DocumentBuilder + TemplateRegistry, SchedulerService, NotificationPreferenceService | Document Experience + Automation | 2 weeks | Document workspace can render/export sample doc, scheduler can trigger mock runs |
-| Sprint 3 | Logging/Telemetry pipeline, BackupService, SecurityScanner, Installer validator | Platform Operations | 2 weeks | Settings/CLI can configure logging+telemetry, backup/restore CLI green, audit hooks wired |
+| Phase    | Scope Highlights                                                                                 | Primary Owners                   | Target Duration | Exit Criteria                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------ | -------------------------------- | --------------- | ----------------------------------------------------------------------------------------- |
+| Sprint 0 | Leaf components (AuditLogService foundation, AppPaths helper, TestRunnerService + UI wiring)     | Platform Enablement              | 1 week          | CLI + renderer demos working, vitest suites green                                         |
+| Sprint 1 | WorkflowRuntime/DraftService scaffolding, ConnectorRegistry contracts, ConfigService foundations | Core Runtime + Integration       | 2–3 weeks       | Domain models published, draft persistence + validation APIs available                    |
+| Sprint 2 | DocumentBuilder + TemplateRegistry, SchedulerService, NotificationPreferenceService              | Document Experience + Automation | 2 weeks         | Document workspace can render/export sample doc, scheduler can trigger mock runs          |
+| Sprint 3 | Logging/Telemetry pipeline, BackupService, SecurityScanner, Installer validator                  | Platform Operations              | 2 weeks         | Settings/CLI can configure logging+telemetry, backup/restore CLI green, audit hooks wired |
 
 Dependencies: Sprint 1 unblocks SchedulerService + Document builders; Sprint 2 depends on ConfigService/ConnectorRegistry; Sprint 3 depends on AuditLog + ConfigService.
 
 ## 8. Current Status & Next Steps
 
-| Component | Status | Notes / Follow-ups |
-|-----------|--------|--------------------|
-| AuditLogService foundation (leaf) | ✅ Prototype implemented (SQLite writer, CLI viewer) | Extend to cover retention settings + renderer view |
-| AppPaths helper | ✅ Ready | Reuse for ConfigService + BackupService path resolution |
-| TestRunnerService + Test Console UI | ✅ Vitest suites wired, run-all control added | Expand suites list as new components gain tests, add artifact download |
-| WorkflowRuntime & Draft Service | 🟢 Core services live | Snapshot/publish logic + designer hooks outstanding |
-| ConnectorRegistry & CredentialVault | 🟡 Planning | Define abstraction + vault adapters |
-| Document & Template services | 🟢 Document export path live | Next: TemplateRegistry, revision diffs, previews |
-| Scheduler/Automation | 🟡 Planning | Blocked on runtime command bus |
-| Logging/Telemetry/Backup/Security | 🟡 Planning | Requires ConfigService + Audit hooks |
-| TelemetryExporter skeleton | 🔜 | After logging configuration module lands |
+| Component                           | Status                                               | Notes / Follow-ups                                                     |
+| ----------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------- |
+| AuditLogService foundation (leaf)   | ✅ Prototype implemented (SQLite writer, CLI viewer) | Extend to cover retention settings + renderer view                     |
+| AppPaths helper                     | ✅ Ready                                             | Reuse for ConfigService + BackupService path resolution                |
+| TestRunnerService + Test Console UI | ✅ Vitest suites wired, run-all control added        | Expand suites list as new components gain tests, add artifact download |
+| WorkflowRuntime & Draft Service     | 🟢 Core services live                                | Snapshot/publish logic + designer hooks outstanding                    |
+| ConnectorRegistry & CredentialVault | 🟡 Planning                                          | Define abstraction + vault adapters                                    |
+| Document & Template services        | 🟢 Document export path live                         | Next: TemplateRegistry, revision diffs, previews                       |
+| Scheduler/Automation                | 🟡 Planning                                          | Blocked on runtime command bus                                         |
+| Logging/Telemetry/Backup/Security   | 🟡 Planning                                          | Requires ConfigService + Audit hooks                                   |
+| TelemetryExporter skeleton          | 🔜                                                   | After logging configuration module lands                               |
 
 Immediate actions:
+
 1. Wire designer autosave + scheduler stubs to the new ValidationService/runtime events.
 2. Define TemplateRegistry + revision storage schema and draft migration.
 3. Extend document workspace with previews/links and document export download helpers.
-

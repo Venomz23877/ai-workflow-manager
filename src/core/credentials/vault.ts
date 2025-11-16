@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
+import type * as Keytar from 'keytar'
 
 export type VaultProvider = 'os' | 'json'
 
@@ -15,6 +16,9 @@ export interface CredentialVaultOptions {
   provider?: VaultProvider
   fallbackDir?: string
   encryptionKey?: string | null
+  serviceName?: string
+  forceJsonProvider?: boolean
+  keytarModule?: typeof Keytar
 }
 
 interface VaultStrategy {
@@ -24,19 +28,37 @@ interface VaultStrategy {
   listSecrets(prefix?: string): Promise<VaultSecret[]>
 }
 
+const SERVICE_NAME = 'AI Workflow Manager'
+
+const loadKeytar = (moduleOverride?: typeof Keytar): typeof Keytar | null => {
+  if (moduleOverride) return moduleOverride
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require('keytar')
+  } catch {
+    return null
+  }
+}
+
 export class CredentialVault {
   private strategy: VaultStrategy
 
   constructor(options: CredentialVaultOptions = {}) {
     const provider = options.provider ?? detectDefaultProvider()
-    if (provider === 'json') {
-      this.strategy = new JsonVault({
-        dir: options.fallbackDir ?? path.join(os.homedir(), '.aiwm', 'vault'),
-        encryptionKey: options.encryptionKey
-      })
-    } else {
-      this.strategy = new OsVault()
+    const forceJson = options.forceJsonProvider || process.env.AIWM_FORCE_JSON_VAULT === '1'
+    if (provider === 'json' || forceJson) {
+      this.strategy = createJsonStrategy(options)
+      return
     }
+    const keytar = loadKeytar(options.keytarModule)
+    if (!keytar) {
+      console.warn(
+        '[CredentialVault] OS provider requested but keytar is unavailable. Falling back to JSON store.'
+      )
+      this.strategy = createJsonStrategy(options)
+      return
+    }
+    this.strategy = new OsVault(keytar, options.serviceName ?? SERVICE_NAME)
   }
 
   storeSecret(secret: VaultSecret) {
@@ -56,26 +78,59 @@ export class CredentialVault {
   }
 }
 
+const createJsonStrategy = (options: CredentialVaultOptions) =>
+  new JsonVault({
+    dir: options.fallbackDir ?? path.join(os.homedir(), '.aiwm', 'vault'),
+    encryptionKey: options.encryptionKey
+  })
+
 const detectDefaultProvider = (): VaultProvider => {
   if (process.env.AIWM_VAULT_PROVIDER === 'os') return 'os'
   return 'json'
 }
 
 class OsVault implements VaultStrategy {
+  constructor(
+    private keytar: typeof Keytar,
+    private serviceName: string
+  ) {}
+
   async storeSecret(secret: VaultSecret): Promise<void> {
-    throw new Error('OS vault provider not yet implemented for this platform')
+    const payload = JSON.stringify({
+      value: secret.value,
+      metadata: secret.metadata ?? {}
+    })
+    await this.keytar.setPassword(this.serviceName, secret.key, payload)
   }
 
-  async retrieveSecret(_key: string): Promise<VaultSecret | null> {
-    throw new Error('OS vault provider not yet implemented for this platform')
+  async retrieveSecret(key: string): Promise<VaultSecret | null> {
+    const payload = await this.keytar.getPassword(this.serviceName, key)
+    if (!payload) return null
+    return this.deserialize(key, payload)
   }
 
-  async deleteSecret(_key: string): Promise<void> {
-    throw new Error('OS vault provider not yet implemented for this platform')
+  async deleteSecret(key: string): Promise<void> {
+    await this.keytar.deletePassword(this.serviceName, key)
   }
 
-  async listSecrets(_prefix?: string): Promise<VaultSecret[]> {
-    throw new Error('OS vault provider not yet implemented for this platform')
+  async listSecrets(prefix?: string): Promise<VaultSecret[]> {
+    const records = await this.keytar.findCredentials(this.serviceName)
+    return records
+      .filter((record) => (prefix ? record.account.startsWith(prefix) : true))
+      .map((record) => this.deserialize(record.account, record.password))
+  }
+
+  private deserialize(key: string, payload: string): VaultSecret {
+    try {
+      const parsed = JSON.parse(payload)
+      return {
+        key,
+        value: parsed.value ?? '',
+        metadata: parsed.metadata ?? {}
+      }
+    } catch {
+      return { key, value: payload }
+    }
   }
 }
 

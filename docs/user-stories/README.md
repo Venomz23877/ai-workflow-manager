@@ -43,15 +43,15 @@ Then <expected result>
 
 ## Epic Structure
 
-| Epic Code | Title | Description |
-|-----------|-------|-------------|
-| EP1 | Workflow Authoring | Visual designer, node configuration, validation |
-| EP2 | Workflow Execution | Action console, triggers, monitoring, CLI parity |
-| EP3 | Connector & Credential Management | Storage/LLM setup, vault interactions |
-| EP4 | Document Management | Template editing, generation, exports |
-| EP5 | Automation & CLI | Headless execution, scripting, logs |
-| EP6 | Templates & Sharing | Workflow/template library, export/import |
-| EP7 | Platform Operations | Logging, telemetry, installer, upgrades |
+| Epic Code | Title                             | Description                                      |
+| --------- | --------------------------------- | ------------------------------------------------ |
+| EP1       | Workflow Authoring                | Visual designer, node configuration, validation  |
+| EP2       | Workflow Execution                | Action console, triggers, monitoring, CLI parity |
+| EP3       | Connector & Credential Management | Storage/LLM setup, vault interactions            |
+| EP4       | Document Management               | Template editing, generation, exports            |
+| EP5       | Automation & CLI                  | Headless execution, scripting, logs              |
+| EP6       | Templates & Sharing               | Workflow/template library, export/import         |
+| EP7       | Platform Operations               | Logging, telemetry, installer, upgrades          |
 
 Additional epics can be appended as requirements expand. Each epic should include at least one “hero” story capturing the main use case plus supporting stories for edge cases and error handling.
 
@@ -64,4 +64,3 @@ Additional epics can be appended as requirements expand. Each epic should includ
 5. Capture traceability in the project matrix (`docs/project-delivery-plan.md`).
 
 Maintaining this structure ensures user needs map cleanly to architectural components and UX deliverables, enabling smooth handoff into implementation planning.
-

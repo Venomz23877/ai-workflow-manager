@@ -13,6 +13,7 @@ This document outlines the major architecture components from `docs/architecture
 ## Dependency Map
 
 ### Core Workflow Stack
+
 - **WorkflowRuntime**
   - depends on: WorkflowDraftService, WorkflowRepository, WorkflowRunRepository, ValidationService, WorkflowEventPublisher, ConnectorRegistry, CredentialVault, DocumentBuilder (for actions), SchedulerService (for scheduled runs), ConfigService (profiles).
 - **WorkflowDraftService**
@@ -25,6 +26,7 @@ This document outlines the major architecture components from `docs/architecture
   - depends on: WorkflowRepository, DocumentRegistry, TemplateRegistry, ConnectorRegistry metadata, CredentialVault (for references), AuditLogService (record operations).
 
 ### Document & Template Stack
+
 - **DocumentRegistry**
   - depends on: DocumentBuilder (preview/render), DocumentRevisionRepository, FileConnector, WorkflowRepository (linking nodes), ConfigService (schema associations).
 - **DocumentBuilder (DOCX/PDF/etc.)**
@@ -37,6 +39,7 @@ This document outlines the major architecture components from `docs/architecture
   - depends on: TemplateRegistry, DocumentRegistry, WorkflowExportService, ConnectorRegistry metadata, CredentialVault (metadata only), AuditLogService.
 
 ### Connectors & Credentials
+
 - **ConnectorRegistry**
   - depends on: Individual connectors (storage/LLM/file/document adapters), ConfigService (selections), CredentialVault (secret retrieval), Logging pipeline (status), NotificationService (health alerts).
 - **CredentialVault**
@@ -45,6 +48,7 @@ This document outlines the major architecture components from `docs/architecture
   - depends on: FileSandboxGuard (allowlist), ConfigService (paths), CredentialVault (if remote storage future).
 
 ### Automation & Scheduling
+
 - **SchedulerService**
   - depends on: WorkflowRuntime, ConfigService (profiles, schedules), CredentialVault (per-profile secrets), NotificationService (alerts), Logging pipeline.
 - **ActionInvocationService**
@@ -53,6 +57,7 @@ This document outlines the major architecture components from `docs/architecture
   - depends on: WorkflowRuntime APIs, ConnectorRegistry, CredentialVault, DocumentRegistry, TemplateRegistry, SchedulerService, ConfigService, AuditLogService.
 
 ### Operations, Logging, Telemetry, Security
+
 - **Logging/Telemetry Pipeline**
   - depends on: ConfigService (levels/destinations), WorkflowEventPublisher, TelemetryExporter.
 - **TelemetryExporter**
@@ -69,6 +74,7 @@ This document outlines the major architecture components from `docs/architecture
   - standalone persistence, feeds Dashboard/CLI; depends on ConfigService for retention, Logging pipeline for errors.
 
 ### Shared Utilities
+
 - **ConfigService**
   - central dependency for most components; stores connector selections, profiles, logging, telemetry, schedules, notification prefs.
 - **NotificationService**
@@ -103,3 +109,15 @@ ConfigService
 - Update the map as new components emerge (e.g., future analytics, collaboration services).
 - Consider converting this into a diagram (Mermaid/PlantUML) once component interfaces solidify.
 
+## Status Snapshot (Sprint 4 Kickoff)
+
+| Area                                       | Status                                       | Notes                                                                                                        |
+| ------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| WorkflowRuntime & Draft Service            | 🟢 Core services live                        | Snapshot/publish linkage and scheduler hooks outstanding.                                                    |
+| TemplateRegistry & Document Workspace      | 🟢 Registry, revisions, diff tooling shipped | Need permissions, export/import manifests, renderer previews.                                                |
+| ConnectorRegistry & CredentialVault        | 🟢 Implemented                               | Managed registry + CLI/IPC flows plus keytar-backed OS vaults shipped; renderer settings will expand on top. |
+| SchedulerService & Diagnostics             | 🟡 Planning                                  | CLI exists; runtime wiring, renderer settings, and cron support pending.                                     |
+| Logging/Telemetry/Backup/Security          | 🟡 In progress                               | Retention automation enforces log/telemetry/backup/security policies; renderer diagnostics still pending.    |
+| AuditLogService & Notification Preferences | 🟢 Foundations built                         | Need enforcement coverage for new Sprint 4 features.                                                         |
+
+_Tracking legend_: 🟢 implemented (follow-up work remaining), 🟡 planned/in progress, 🔴 not started.

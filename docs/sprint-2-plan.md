@@ -1,18 +1,21 @@
 # Sprint 2 Plan — Workflow Runtime, Designer Drafts, and Document Services
 
 ## Objectives
+
 1. Ship the Workflow Runtime + DraftService foundations so end-to-end authoring flows work (designer autosave, validation, publish).
 2. Deliver baseline Document/Template services (registry, builders, workspace IO) anchored on the new FileConnector.
 3. Expose runtime/draft operations over IPC/CLI to unblock automation and future Scheduler work.
 
 ## High-Level Scope
-| Workstream | Key Components |
-|------------|----------------|
-| Workflow Domain & Drafts | WorkflowRuntime, WorkflowDraftService, ValidationService integration |
+
+| Workstream                   | Key Components                                                                         |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| Workflow Domain & Drafts     | WorkflowRuntime, WorkflowDraftService, ValidationService integration                   |
 | Document & Template Services | DocumentRegistry, DocumentBuilder strategies (DOCX/PDF/Markdown), DocumentWorkspace IO |
-| CLI / IPC Surfaces | Renderer preload + CLI commands for draft CRUD, validation, document export |
+| CLI / IPC Surfaces           | Renderer preload + CLI commands for draft CRUD, validation, document export            |
 
 ## Sequencing (2-week sprint)
+
 1. **Domain Modeling & Draft API (Days 1-3)**
    - Finalize `src/core/domain/workflows.ts` types.
    - Create SQLite migrations for `workflow_versions`, `workflow_nodes`, `workflow_transitions`.
@@ -32,7 +35,9 @@
    - Integration tests, UX polish, address risk items.
 
 ## Detailed Task Lists
+
 ### Workflow Runtime & Draft Service
+
 - [x] Domain models/types + migrations.
 - [x] `WorkflowDraftService` with autosave/version history.
 - [x] ValidationService runner + error DTOs.
@@ -43,6 +48,7 @@
 - [x] Renderer draft panel (validate/publish/delete) completing designer flow requirements.
 
 ### Document & Template Services
+
 - [x] DocumentRegistry schema + repository.
 - [x] DocumentBuilder implementations (`DocxBuilder`, `PdfBuilder`, `MarkdownBuilder`).
 - [x] Renderer document workspace integration (export via FileConnector).
@@ -50,18 +56,20 @@
 - [x] Vitest: document builder/service outputs, registry CRUD.
 
 ### Shared / Ops
+
 - [x] Update Test Console with `workflow-drafts`, `workflow-validation`, `document-service` suites once tests exist.
 - [x] Audit logging for document exports (draft publish logging planned alongside publish feature).
 - [x] Docs: update architecture & implementation plan with Sprint 2 status.
 
 ## Risks & Mitigations
+
 - **Schema churn**: lock schema before sprint ends; document migrations clearly.
 - **Binary document handling**: start with deterministic fixtures for doc builders to keep tests reliable.
 - **Runtime complexity**: keep WorkflowRuntime minimal (state transitions + logging) until validation is stable.
 
 ## Definition of Done
+
 - Draft designer flows can create/save/validate/publish workflows via IPC, renderer UI, and CLI. ✅
 - Document workspace can export documents (Markdown/DOCX/PDF) via renderer + CLI with registry history. ✅
 - New vitest suites (`workflow-drafts`, `workflow-validation`, `workflow-runtime`, `document-service`) run via `npm test` and appear in Test Console. ✅
 - Docs (`implementation-plan.md`, `sprint-2-plan.md`) updated with completion status and next steps. ✅
-

@@ -48,4 +48,3 @@ Then rotation events appear with searchable metadata
 - Provide reminder scheduler for rotations.
 - Audit log storage should be append-only with tamper resistance.
 - Open questions: Should we support dual-key mode (primary/fallback) simultaneously?
-

@@ -51,13 +51,13 @@ The document workspace is where authors edit templates and outputs tied to workf
 
 ## Interaction Contracts
 
-| Scenario | Input | System Reaction | Outbound Events |
-|----------|-------|-----------------|-----------------|
-| Autosave | Idle > 5s | Document saved locally, banner “Draft saved” | `document.autosave.completed` |
-| Save & Revalidate | Click button | Document persisted, validation queue triggered | `document.saved`, `workflow.validation.requested` |
-| Format switch | Select new format (if supported) | Conversion confirmation shown; backup created | `document.format.changed` |
-| Export | Click `Export` | Dialog to choose format/destination; success toast | `document.export.generated` |
-| Schema error | Invalid JSON | Inline error highlight; save disabled until resolved | `document.validation.failed` |
+| Scenario          | Input                            | System Reaction                                      | Outbound Events                                   |
+| ----------------- | -------------------------------- | ---------------------------------------------------- | ------------------------------------------------- |
+| Autosave          | Idle > 5s                        | Document saved locally, banner “Draft saved”         | `document.autosave.completed`                     |
+| Save & Revalidate | Click button                     | Document persisted, validation queue triggered       | `document.saved`, `workflow.validation.requested` |
+| Format switch     | Select new format (if supported) | Conversion confirmation shown; backup created        | `document.format.changed`                         |
+| Export            | Click `Export`                   | Dialog to choose format/destination; success toast   | `document.export.generated`                       |
+| Schema error      | Invalid JSON                     | Inline error highlight; save disabled until resolved | `document.validation.failed`                      |
 
 ## Accessibility & Inclusivity
 
@@ -82,4 +82,3 @@ The document workspace is where authors edit templates and outputs tied to workf
 
 - `docs/ux-flows.md#D.-Editing-Documents-within-a-Workflow`
 - `docs/user-requirements.md` — Document management requirements
-

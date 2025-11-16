@@ -11,4 +11,3 @@ export class TemplateDiffService {
     return Diff.diffLines(before, after)
   }
 }
-

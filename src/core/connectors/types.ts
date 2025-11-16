@@ -31,3 +31,14 @@ export interface ConnectorSummary extends ConnectorMetadata {
   status: 'idle' | 'initializing' | 'ready' | 'error'
   lastHealthCheck?: HealthCheckResult
 }
+
+export interface ManagedConnectorDefinition {
+  id: string
+  name: string
+  kind: ConnectorKind
+  version: string
+  description?: string
+  capabilities?: ConnectorCapability[]
+  requiresSecrets?: string[]
+  config?: Record<string, unknown>
+}

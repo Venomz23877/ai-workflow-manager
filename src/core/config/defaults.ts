@@ -1,3 +1,4 @@
+import { DEFAULT_NOTIFICATION_PREFERENCES } from '../notifications/types'
 import { ConfigData } from './types'
 
 export const defaultConfig = (): ConfigData => ({
@@ -11,7 +12,8 @@ export const defaultConfig = (): ConfigData => ({
       active: 'sqlite',
       available: ['sqlite'],
       sandboxPaths: []
-    }
+    },
+    registry: {}
   },
   credentials: {
     vault: {
@@ -36,5 +38,22 @@ export const defaultConfig = (): ConfigData => ({
   },
   fileSandbox: {
     allowlist: []
+  },
+  notifications: {
+    preferences: DEFAULT_NOTIFICATION_PREFERENCES
+  },
+  diagnostics: {
+    rendererPanels: {
+      logs: true,
+      telemetry: true,
+      notifications: true,
+      schedules: true
+    }
+  },
+  retention: {
+    logs: { days: 14 },
+    telemetry: { days: 7 },
+    backups: { keep: 5 },
+    securityScans: { days: 30 }
   }
 })

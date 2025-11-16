@@ -55,4 +55,3 @@ Then older revisions archive automatically with a warning banner and option to e
 - Store revisions as compressed blobs plus metadata; diff computed on demand.
 - Support textual diff for Markdown/HTML, structural diff for JSON/YAML.
 - Provide retention configuration via settings (ties into ConfigService).
-

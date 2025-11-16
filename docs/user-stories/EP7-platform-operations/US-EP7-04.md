@@ -54,4 +54,3 @@ Then exit code reflects success (0), warnings (1), or failure (2)
 
 - Migrations tracked in `migrations` table (version, checksum, applied_at).
 - Provide hook for connectors beyond SQLite later.
-

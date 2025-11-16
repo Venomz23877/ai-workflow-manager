@@ -55,4 +55,3 @@ Then the editor falls back to syntax linting and shows a banner inviting me to l
 - Support JSON Schema draft 2020-12; YAML converted to JSON for validation.
 - Schemas stored locally or pulled from repo; references stored in document metadata.
 - Provide option to override validation with audit log entry.
-

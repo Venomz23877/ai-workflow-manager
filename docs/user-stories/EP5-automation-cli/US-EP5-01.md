@@ -55,4 +55,3 @@ Then exit code is non-zero and includes failure summary
 - CLI should reuse same IPC/REST endpoint as renderer to prevent logic duplication.
 - Provide `--env` flag for selecting profiles; defaults to local.
 - Output must include correlation ID for cross-tool debugging.
-

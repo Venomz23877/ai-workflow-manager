@@ -34,4 +34,3 @@ export class LoggingService {
     return this.logFile
   }
 }
-

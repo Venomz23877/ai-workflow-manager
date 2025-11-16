@@ -50,4 +50,3 @@ Then the UI surfaces warnings and deep links to settings or file sandbox configu
 - Open questions:
   - How do we support custom action plugins authored by integrators?
   - Do we allow inline scripting or only declarative configuration in v1?
-

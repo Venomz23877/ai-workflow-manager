@@ -48,4 +48,3 @@ Then I see a recovery banner describing the autosaved state and offering to rest
 - Version notes stored with metadata; diff uses JSON structure comparison.
 - CLI commands: `aiwm workflows history <slug>`, `aiwm workflows restore <slug> --version N`.
 - Open questions: retention policy for draft history; encryption for sensitive backups.
-

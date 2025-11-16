@@ -54,4 +54,3 @@ Then AuditLogService captures the change with user and justification
 
 - Provide local cache for telemetry events; flush only if enabled.
 - Support manual “Send diagnostics” button to upload once without enabling ongoing telemetry.
-

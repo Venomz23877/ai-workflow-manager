@@ -4,7 +4,7 @@
 
 **Actual Outcomes Announces AI Workflow Manager: A Desktop Platform for Designing and Running Agentic AI Workflows**
 
-*November 14, 2025 – Remote* — Actual Outcomes LLC today unveiled AI Workflow Manager, a cross-platform desktop application that empowers teams to design, run, and refine AI-driven workflows without writing code. Built with Electron and React, the app combines a visual workflow designer, a powerful CLI, and secure local storage to help organizations operationalize large language models alongside customizable business logic.
+_November 14, 2025 – Remote_ — Actual Outcomes LLC today unveiled AI Workflow Manager, a cross-platform desktop application that empowers teams to design, run, and refine AI-driven workflows without writing code. Built with Electron and React, the app combines a visual workflow designer, a powerful CLI, and secure local storage to help organizations operationalize large language models alongside customizable business logic.
 
 “Teams are ready to move beyond one-off prompts,” said Natalie Carter, Head of Product at Actual Outcomes. “AI Workflow Manager gives them a structure—a way to drag a Decision node onto a canvas, plug in their policy prompts, and connect it to a Loop that iterates until the output meets their standards. It’s the missing bridge between imagination and repeatable AI operations.”
 
@@ -47,5 +47,4 @@ www.actualoutcomes.com
 
 ---
 
-*This draft is intended for launch-day distribution and should be updated with finalized quotes, pricing, and download links prior to release.*
-
+_This draft is intended for launch-day distribution and should be updated with finalized quotes, pricing, and download links prior to release._

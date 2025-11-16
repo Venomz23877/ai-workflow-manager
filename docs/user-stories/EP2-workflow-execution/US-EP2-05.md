@@ -48,4 +48,3 @@ Then audit logs capture operator identity, timestamp, and optional reason
 - CLI parity: `aiwm runs pause <runId> --reason`.
 - Need guardrails for max pause duration; optionally auto-resume or expire runs.
 - Open questions: Should we allow scheduled resumes?
-

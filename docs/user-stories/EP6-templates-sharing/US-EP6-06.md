@@ -53,4 +53,3 @@ Then the CLI enforces role checks and logs the change
 
 - Provide `--profile` flag for multi-environment operations.
 - Commands should support piping package content via stdin/stdout for CI usage.
-

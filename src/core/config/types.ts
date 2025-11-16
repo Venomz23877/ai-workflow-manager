@@ -1,3 +1,6 @@
+import { ManagedConnectorDefinition } from '../connectors/types'
+import { NotificationPreferences } from '../notifications/types'
+
 export type LogLevel = 'error' | 'warn' | 'info' | 'debug'
 
 export interface ConnectorSelection {
@@ -11,11 +14,34 @@ export interface FileSandboxEntry {
   write: boolean
 }
 
+export interface DiagnosticsPanelConfig {
+  logs: boolean
+  telemetry: boolean
+  notifications: boolean
+  schedules: boolean
+}
+
+export interface RetentionPoliciesConfig {
+  logs: {
+    days: number
+  }
+  telemetry: {
+    days: number
+  }
+  backups: {
+    keep: number
+  }
+  securityScans: {
+    days: number
+  }
+}
+
 export interface ConfigData {
   version: number
   connectors: {
     llm: ConnectorSelection
     storage: ConnectorSelection & { sandboxPaths: string[] }
+    registry: Record<string, ManagedConnectorDefinition>
   }
   credentials: {
     vault: {
@@ -43,6 +69,13 @@ export interface ConfigData {
   fileSandbox: {
     allowlist: FileSandboxEntry[]
   }
+  notifications: {
+    preferences: NotificationPreferences
+  }
+  diagnostics: {
+    rendererPanels: DiagnosticsPanelConfig
+  }
+  retention: RetentionPoliciesConfig
 }
 
 export interface ConfigSnapshot {

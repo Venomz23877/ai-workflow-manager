@@ -48,4 +48,3 @@ Then the command triggers the same workflow action with matching validation
 - Need permission model (some actions restricted to admins).
 - Provide throttle to avoid repeated actions (cool-down per node/action).
 - CLI integration shares same API to avoid duplication.
-

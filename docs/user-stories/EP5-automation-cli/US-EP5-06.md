@@ -55,4 +55,3 @@ Then permissions map to the token’s role and audit entries reference the token
 - Support multiple auth modes: OS user SSO, API token, future org SSO.
 - Audit logs stored append-only; CLI tail command reuses same API as UI auditor.
 - Consider `--impersonate` guardrails for admin debugging.
-

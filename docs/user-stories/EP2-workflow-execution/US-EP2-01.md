@@ -48,4 +48,3 @@ Then I can run the equivalent `aiwm workflows run <slug>` command with the same 
 - Provide API for templated run parameter forms.
 - CLI hint includes `--version`, `--connector`, `--doc` flags as applicable.
 - Open questions: Do we support scheduling directly from the modal?
-

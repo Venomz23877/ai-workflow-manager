@@ -20,6 +20,25 @@ interface DocumentRecord {
   updatedAt: string
 }
 
+interface NotificationPreferences {
+  quietHours: {
+    start: string
+    end: string
+  }
+  channels: string[]
+}
+
+interface ScheduleRecord {
+  id: number
+  workflowId: number
+  cron: string
+  timezone: string | null
+  status: 'active' | 'paused'
+  nextRunAt?: string | null
+  lastRunAt?: string | null
+  profile?: string | null
+}
+
 interface WorkflowDraftRecord {
   id: number
   name: string
@@ -45,7 +64,7 @@ interface Workflow {
   updated_at: string
 }
 
-type TabId = 'workflows' | 'tests'
+type TabId = 'workflows' | 'tests' | 'diagnostics'
 
 function App() {
   const [workflows, setWorkflows] = useState<Workflow[]>([])
@@ -64,6 +83,17 @@ function App() {
   const [connectors, setConnectors] = useState<ConnectorSummary[]>([])
   const [connectorLoading, setConnectorLoading] = useState(false)
   const [connectorError, setConnectorError] = useState<string | null>(null)
+  const [showConnectorForm, setShowConnectorForm] = useState(false)
+  const [connectorForm, setConnectorForm] = useState({
+    id: '',
+    name: '',
+    kind: 'integration',
+    version: '1.0.0',
+    description: '',
+    capabilities: '',
+    requiresSecrets: ''
+  })
+  const [connectorSubmitting, setConnectorSubmitting] = useState(false)
   const [documents, setDocuments] = useState<DocumentRecord[]>([])
   const [documentsLoading, setDocumentsLoading] = useState(false)
   const [drafts, setDrafts] = useState<WorkflowDraftRecord[]>([])
@@ -75,6 +105,19 @@ function App() {
     content: ''
   })
   const [isExportingDocument, setIsExportingDocument] = useState(false)
+  const [logPath, setLogPath] = useState('')
+  const [telemetryEnabled, setTelemetryEnabledState] = useState(false)
+  const [telemetryUpdating, setTelemetryUpdating] = useState(false)
+  const [notifications, setNotifications] = useState<NotificationPreferences | null>(null)
+  const [notificationForm, setNotificationForm] = useState({
+    quietStart: '',
+    quietEnd: '',
+    channels: ''
+  })
+  const [notificationSaving, setNotificationSaving] = useState(false)
+  const [schedules, setSchedules] = useState<ScheduleRecord[]>([])
+  const [schedulesLoading, setSchedulesLoading] = useState(false)
+  const [diagnosticsLoading, setDiagnosticsLoading] = useState(false)
 
   const loadTestSuites = useCallback(async () => {
     try {
@@ -86,6 +129,18 @@ function App() {
       console.error('Failed to load test suites:', error)
     } finally {
       setTestSuitesLoading(false)
+    }
+  }, [])
+
+  const loadDocuments = useCallback(async () => {
+    try {
+      setDocumentsLoading(true)
+      const records = await window.electronAPI.listDocuments()
+      setDocuments(records)
+    } catch (error) {
+      console.error('Failed to load documents:', error)
+    } finally {
+      setDocumentsLoading(false)
     }
   }, [])
 
@@ -101,6 +156,45 @@ function App() {
     }
   }, [])
 
+  const loadDiagnostics = useCallback(async () => {
+    try {
+      setDiagnosticsLoading(true)
+      setSchedulesLoading(true)
+      const [path, telemetry, prefs, scheduleRecords] = await Promise.all([
+        window.electronAPI.getLogPath(),
+        window.electronAPI.getTelemetryEnabled(),
+        window.electronAPI.getNotificationPreferences(),
+        window.electronAPI.listSchedules()
+      ])
+      setLogPath(path)
+      setTelemetryEnabledState(telemetry)
+      setNotifications(prefs)
+      setNotificationForm({
+        quietStart: prefs.quietHours.start,
+        quietEnd: prefs.quietHours.end,
+        channels: prefs.channels.join(', ')
+      })
+      setSchedules(scheduleRecords)
+    } catch (error) {
+      console.error('Failed to load diagnostics:', error)
+    } finally {
+      setDiagnosticsLoading(false)
+      setSchedulesLoading(false)
+    }
+  }, [])
+
+  const refreshSchedules = useCallback(async () => {
+    try {
+      setSchedulesLoading(true)
+      const scheduleRecords = await window.electronAPI.listSchedules()
+      setSchedules(scheduleRecords)
+    } catch (error) {
+      console.error('Failed to load schedules:', error)
+    } finally {
+      setSchedulesLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     loadWorkflows()
     loadAppVersion()
@@ -108,7 +202,8 @@ function App() {
     loadConnectors()
     loadDocuments()
     loadDrafts()
-  }, [loadTestSuites, loadDocuments, loadDrafts])
+    loadDiagnostics()
+  }, [loadTestSuites, loadDocuments, loadDrafts, loadDiagnostics])
 
   useEffect(() => {
     if (!selectedSuiteId && testSuites.length > 0) {
@@ -212,17 +307,72 @@ function App() {
     }
   }
 
-  const loadDocuments = useCallback(async () => {
-    try {
-      setDocumentsLoading(true)
-      const records = await window.electronAPI.listDocuments()
-      setDocuments(records)
-    } catch (error) {
-      console.error('Failed to load documents:', error)
-    } finally {
-      setDocumentsLoading(false)
+  const resetConnectorForm = () => {
+    setConnectorForm({
+      id: '',
+      name: '',
+      kind: 'integration',
+      version: '1.0.0',
+      description: '',
+      capabilities: '',
+      requiresSecrets: ''
+    })
+  }
+
+  const handleConnectorFormChange = (field: keyof typeof connectorForm, value: string) => {
+    setConnectorForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleRegisterConnector = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!connectorForm.id.trim() || !connectorForm.name.trim()) {
+      alert('Connector ID and name are required.')
+      return
     }
-  }, [])
+    try {
+      setConnectorSubmitting(true)
+      const capabilities = connectorForm.capabilities
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+        .map((entry) => {
+          const [name, desc] = entry.split(':')
+          return { name: name.trim(), description: desc ? desc.trim() : undefined }
+        })
+      const requiresSecrets = connectorForm.requiresSecrets
+        .split(',')
+        .map((secret) => secret.trim())
+        .filter(Boolean)
+      await window.electronAPI.registerConnector({
+        id: connectorForm.id,
+        name: connectorForm.name,
+        kind: connectorForm.kind as ConnectorSummary['kind'],
+        version: connectorForm.version,
+        description: connectorForm.description,
+        capabilities,
+        requiresSecrets
+      })
+      await loadConnectors()
+      resetConnectorForm()
+      setShowConnectorForm(false)
+    } catch (error) {
+      console.error('Failed to register connector:', error)
+      alert('Failed to register connector.')
+    } finally {
+      setConnectorSubmitting(false)
+    }
+  }
+
+  const handleRemoveConnector = async (id: string) => {
+    if (!confirm(`Remove connector "${id}"?`)) return
+    try {
+      await window.electronAPI.removeConnector(id)
+      await loadConnectors()
+    } catch (error) {
+      console.error('Failed to remove connector:', error)
+      alert('Failed to remove connector.')
+    }
+  }
 
   const handleTestConnector = async (id: string) => {
     try {
@@ -237,11 +387,70 @@ function App() {
     }
   }
 
-  const handleDocumentFormChange = (
-    field: 'name' | 'format' | 'content',
+  const handleDocumentFormChange = (field: 'name' | 'format' | 'content', value: string) => {
+    setDocumentForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleCopyLogPath = async () => {
+    if (!logPath) return
+    try {
+      await navigator.clipboard.writeText(logPath)
+      alert('Log path copied to clipboard.')
+    } catch (error) {
+      console.error('Failed to copy log path:', error)
+      alert('Failed to copy log path.')
+    }
+  }
+
+  const handleTelemetryToggle = async () => {
+    try {
+      setTelemetryUpdating(true)
+      const updated = await window.electronAPI.setTelemetryEnabled(!telemetryEnabled)
+      setTelemetryEnabledState(updated)
+    } catch (error) {
+      console.error('Failed to update telemetry setting:', error)
+      alert('Failed to update telemetry setting.')
+    } finally {
+      setTelemetryUpdating(false)
+    }
+  }
+
+  const handleNotificationInputChange = (
+    field: 'quietStart' | 'quietEnd' | 'channels',
     value: string
   ) => {
-    setDocumentForm((prev) => ({ ...prev, [field]: value }))
+    setNotificationForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleNotificationSave = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!notifications) return
+    try {
+      setNotificationSaving(true)
+      const channels = notificationForm.channels
+        .split(',')
+        .map((channel) => channel.trim())
+        .filter(Boolean)
+      const payload = {
+        quietHours: {
+          start: notificationForm.quietStart || notifications.quietHours.start,
+          end: notificationForm.quietEnd || notifications.quietHours.end
+        },
+        channels: channels.length ? channels : notifications.channels
+      }
+      const updated = await window.electronAPI.setNotificationPreferences(payload)
+      setNotifications(updated)
+      setNotificationForm({
+        quietStart: updated.quietHours.start,
+        quietEnd: updated.quietHours.end,
+        channels: updated.channels.join(', ')
+      })
+    } catch (error) {
+      console.error('Failed to update notification preferences:', error)
+      alert('Failed to save notification preferences.')
+    } finally {
+      setNotificationSaving(false)
+    }
   }
 
   const handleValidateDraft = async (id: number) => {
@@ -249,7 +458,11 @@ function App() {
       setDraftActionId(id)
       const result = await window.electronAPI.validateWorkflowDraft(id)
       if (result.valid) {
-        alert(result.warnings.length ? `Valid with warnings:\n${result.warnings.join('\n')}` : 'Draft valid')
+        alert(
+          result.warnings.length
+            ? `Valid with warnings:\n${result.warnings.join('\n')}`
+            : 'Draft valid'
+        )
       } else {
         alert(`Draft invalid:\n${result.errors.join('\n')}`)
       }
@@ -390,6 +603,11 @@ function App() {
     return new Date(value).toLocaleString()
   }
 
+  const formatScheduleTime = (value?: string | null) => {
+    if (!value) return '—'
+    return new Date(value).toLocaleString()
+  }
+
   const getSuiteStatusLabel = (suite: ListedTestSuite) => {
     if (suite.isRunning) return 'Running...'
     if (!suite.lastRun) return 'Never run'
@@ -467,6 +685,16 @@ function App() {
               }}
             >
               Test Console
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'diagnostics' ? 'active' : ''}`}
+              type="button"
+              onClick={() => {
+                setActiveTab('diagnostics')
+                loadDiagnostics()
+              }}
+            >
+              Diagnostics
             </button>
           </div>
           {activeTab === 'workflows' && (
@@ -645,7 +873,92 @@ function App() {
                 >
                   {connectorLoading ? 'Refreshing…' : 'Refresh'}
                 </button>
+                <button
+                  className="btn-secondary"
+                  type="button"
+                  onClick={() => setShowConnectorForm((prev) => !prev)}
+                >
+                  {showConnectorForm ? 'Cancel' : 'Add Connector'}
+                </button>
               </div>
+              {showConnectorForm && (
+                <div classnamed="connector-form-card">
+                  <form className="notification-form" onSubmit={handleRegisterConnector}>
+                    <div className="form-group">
+                      <label htmlFor="connector-id">ID</label>
+                      <input
+                        id="connector-id"
+                        value={connectorForm.id}
+                        onChange={(e) => handleConnectorFormChange('id', e.target.value)}
+                        placeholder="storage.local"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="connector-name">Name</label>
+                      <input
+                        id="connector-name"
+                        value={connectorForm.name}
+                        onChange={(e) => handleConnectorFormChange('name', e.target.value)}
+                        placeholder="Local Storage"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="connector-kind">Kind</label>
+                      <select
+                        id="connector-kind"
+                        value={connectorForm.kind}
+                        onChange={(e) => handleConnectorFormChange('kind', e.target.value)}
+                      >
+                        <option value="integration">Integration</option>
+                        <option value="storage">Storage</option>
+                        <option value="document">Document</option>
+                        <option value="llm">LLM</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="connector-version">Version</label>
+                      <input
+                        id="connector-version"
+                        value={connectorForm.version}
+                        onChange={(e) => handleConnectorFormChange('version', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="connector-description">Description</label>
+                      <input
+                        id="connector-description"
+                        value={connectorForm.description}
+                        onChange={(e) => handleConnectorFormChange('description', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="connector-capabilities">Capabilities (csv, name:desc)</label>
+                      <input
+                        id="connector-capabilities"
+                        value={connectorForm.capabilities}
+                        onChange={(e) => handleConnectorFormChange('capabilities', e.target.value)}
+                        placeholder="read storage:Provides access"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="connector-secrets">Requires Secrets (csv)</label>
+                      <input
+                        id="connector-secrets"
+                        value={connectorForm.requiresSecrets}
+                        onChange={(e) =>
+                          handleConnectorFormChange('requiresSecrets', e.target.value)
+                        }
+                        placeholder="connector:storage:api"
+                      />
+                    </div>
+                    <button className="btn-primary" type="submit" disabled={connectorSubmitting}>
+                      {connectorSubmitting ? 'Saving…' : 'Register Connector'}
+                    </button>
+                  </form>
+                </div>
+              )}
               {connectorError && <div className="test-error">{connectorError}</div>}
               {connectorLoading ? (
                 <div className="loading small">Loading connectors…</div>
@@ -685,6 +998,13 @@ function App() {
                       >
                         Run Health Check
                       </button>
+                      <button
+                        className="btn-danger"
+                        type="button"
+                        onClick={() => handleRemoveConnector(connector.id)}
+                      >
+                        Remove
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -723,7 +1043,10 @@ function App() {
                         id="doc-format"
                         value={documentForm.format}
                         onChange={(e) =>
-                          handleDocumentFormChange('format', e.target.value as DocumentRecord['type'])
+                          handleDocumentFormChange(
+                            'format',
+                            e.target.value as DocumentRecord['type']
+                          )
                         }
                       >
                         <option value="markdown">Markdown</option>
@@ -840,7 +1163,9 @@ function App() {
                             className="btn-secondary download-all"
                             type="button"
                             onClick={handleExportAllResults}
-                            disabled={!canExportAllResults || isExportingAll || runningSuiteId !== null}
+                            disabled={
+                              !canExportAllResults || isExportingAll || runningSuiteId !== null
+                            }
                           >
                             {isExportingAll ? 'Saving...' : 'Download Results'}
                           </button>
@@ -911,6 +1236,166 @@ function App() {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'diagnostics' && (
+          <div className="diagnostics-grid">
+            <section className="diagnostic-card">
+              <div className="diagnostic-card-header">
+                <div>
+                  <h3>Logging</h3>
+                  <p>Current application log destination.</p>
+                </div>
+                <div className="diagnostic-actions">
+                  <button className="btn-secondary" type="button" onClick={loadDiagnostics}>
+                    Refresh
+                  </button>
+                  <button
+                    className="btn-secondary"
+                    type="button"
+                    onClick={handleCopyLogPath}
+                    disabled={!logPath}
+                  >
+                    Copy Path
+                  </button>
+                </div>
+              </div>
+              {diagnosticsLoading && !logPath ? (
+                <div className="loading small">Loading log path…</div>
+              ) : (
+                <code className="log-path">{logPath || 'Log path unavailable'}</code>
+              )}
+            </section>
+
+            <section className="diagnostic-card">
+              <div className="diagnostic-card-header">
+                <div>
+                  <h3>Telemetry</h3>
+                  <p>Opt-in diagnostic payload generation.</p>
+                </div>
+                <button
+                  className="btn-secondary"
+                  type="button"
+                  onClick={handleTelemetryToggle}
+                  disabled={telemetryUpdating}
+                >
+                  {telemetryUpdating
+                    ? 'Updating…'
+                    : telemetryEnabled
+                      ? 'Disable Telemetry'
+                      : 'Enable Telemetry'}
+                </button>
+              </div>
+              <p className="diagnostic-subtext">
+                Status:{' '}
+                <strong className={telemetryEnabled ? 'status-enabled' : 'status-disabled'}>
+                  {telemetryEnabled ? 'Enabled' : 'Disabled'}
+                </strong>
+              </p>
+            </section>
+
+            <section className="diagnostic-card">
+              <div className="diagnostic-card-header">
+                <div>
+                  <h3>Notification Preferences</h3>
+                  <p>Quiet hours and delivery channels.</p>
+                </div>
+              </div>
+              {!notifications ? (
+                <div className="loading small">Loading notification preferences…</div>
+              ) : (
+                <form className="notification-form" onSubmit={handleNotificationSave}>
+                  <div className="form-group inline">
+                    <label htmlFor="quiet-start">Quiet Start</label>
+                    <input
+                      id="quiet-start"
+                      type="time"
+                      value={notificationForm.quietStart}
+                      onChange={(e) => handleNotificationInputChange('quietStart', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group inline">
+                    <label htmlFor="quiet-end">Quiet End</label>
+                    <input
+                      id="quiet-end"
+                      type="time"
+                      value={notificationForm.quietEnd}
+                      onChange={(e) => handleNotificationInputChange('quietEnd', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="channels">Channels (comma-separated)</label>
+                    <input
+                      id="channels"
+                      type="text"
+                      value={notificationForm.channels}
+                      onChange={(e) => handleNotificationInputChange('channels', e.target.value)}
+                    />
+                  </div>
+                  <button className="btn-primary" type="submit" disabled={notificationSaving}>
+                    {notificationSaving ? 'Saving…' : 'Save Preferences'}
+                  </button>
+                </form>
+              )}
+            </section>
+
+            <section className="diagnostic-card span-2">
+              <div className="diagnostic-card-header">
+                <div>
+                  <h3>Schedules</h3>
+                  <p>Upcoming workflow runs from SchedulerService.</p>
+                </div>
+                <button
+                  className="btn-secondary"
+                  type="button"
+                  onClick={refreshSchedules}
+                  disabled={schedulesLoading}
+                >
+                  {schedulesLoading ? 'Refreshing…' : 'Refresh'}
+                </button>
+              </div>
+              {schedulesLoading && !schedules.length ? (
+                <div className="loading small">Loading schedules…</div>
+              ) : schedules.length === 0 ? (
+                <div className="empty-state compact">
+                  <p>No schedules created yet.</p>
+                </div>
+              ) : (
+                <div className="diagnostic-table-wrapper">
+                  <table className="diagnostic-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Workflow</th>
+                        <th>Cron</th>
+                        <th>Timezone</th>
+                        <th>Next Run</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {schedules.map((schedule) => (
+                        <tr key={schedule.id}>
+                          <td>#{schedule.id}</td>
+                          <td>{schedule.workflowId}</td>
+                          <td>{schedule.cron}</td>
+                          <td>{schedule.timezone ?? 'UTC'}</td>
+                          <td>{formatScheduleTime(schedule.nextRunAt)}</td>
+                          <td>
+                            <span
+                              className={`suite-status ${schedule.status === 'active' ? 'status-passed' : 'status-idle'}`}
+                            >
+                              {schedule.status.toUpperCase()}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
           </div>
         )}
       </main>

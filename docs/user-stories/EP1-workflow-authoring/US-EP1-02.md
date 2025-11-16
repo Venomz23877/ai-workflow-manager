@@ -6,12 +6,15 @@
 - **Status**: Draft
 
 ## Context
+
 After creating a blank workflow, architects must rapidly assemble nodes and transitions. The drag-and-drop experience should be smooth with visual feedback, snapping, and accessible alternatives (keyboard-based placement). This story defines the core interaction for building the workflow graph.
 
 ## User Story
+
 As a workflow architect, I want to drag nodes from the palette onto the canvas and connect them so that I can outline the control flow of my automation.
 
 ## Acceptance Criteria
+
 ```
 Given the designer canvas is open
 When I drag a node type (Decision, WorkStep, Loop) from the palette onto the canvas
@@ -43,13 +46,14 @@ Then the UI shows a non-blocking error toast (“Unable to save placement, retry
 ```
 
 ## UX References
+
 - `docs/ux-flows.md#A.-Designing-a-New-Workflow`
 - Upcoming narrative spec: `docs/ux/narratives/designer.md`
 
 ## Technical Notes
+
 - Impacts modules: `renderer` (canvas rendering, drag/drop handlers), `main` (persisting draft updates), `core` (workflow graph model).
 - Dependencies: Workflow state schema, trigger configuration UI story.
 - Open Questions:
   - What library or custom implementation handles drag/drop and snapping? (Consider React Flow, custom Canvas)
   - How do we represent transitions in the underlying data structure to support undo/redo efficiently?
-

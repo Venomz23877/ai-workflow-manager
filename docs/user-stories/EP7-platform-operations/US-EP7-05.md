@@ -54,4 +54,3 @@ Then the tool falls back to local database and warns about limited coverage
 
 - Reports stored under `logs/security/` with timestamped JSON + Markdown summary.
 - Provide `--json` flag for automation; exit non-zero on high severity unless `--allow` passed.
-

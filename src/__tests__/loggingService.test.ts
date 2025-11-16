@@ -15,4 +15,3 @@ describe('LoggingService', () => {
     fs.rmSync(dir, { recursive: true, force: true })
   })
 })
-

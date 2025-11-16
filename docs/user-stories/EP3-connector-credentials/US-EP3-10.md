@@ -48,4 +48,3 @@ Then audit logs capture who exported, timestamp, and reason; bundle optionally e
 - Provide versioning to handle breaking changes.
 - Credential metadata includes IDs so keys can be re-associated after import.
 - Open questions: Should we support signing bundles with org certificates?
-

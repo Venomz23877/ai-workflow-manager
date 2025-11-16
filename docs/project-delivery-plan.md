@@ -3,6 +3,7 @@
 ## Goal
 
 Deliver complete application specifications covering:
+
 - Finalized architecture definitions (runtime, data models, connector interfaces, credential vault, event engine).
 - User stories with acceptance criteria for all primary personas/use cases.
 - UX design package including narrative flows, annotated wireframes, and CLI scripts.
@@ -30,34 +31,38 @@ Deliver complete application specifications covering:
 
 ## Deliverables
 
-| Deliverable | Description | Owner | Due |
-|-------------|-------------|-------|-----|
-| `docs/architecture.md` (expanded) | Complete specifications for runtime, connectors, credential vault, logging, installer | Architecture Lead | Week 2 |
-| `docs/user-stories/*.md` | Collection of user story files grouped by epic | Product/BA | Week 3 |
-| `docs/ux/wireframes/*.md` + assets | Wireframe images or ASCII diagrams with annotations | UX | Week 4 |
-| `docs/ux/flows.md` (final) | Updated narrative flows with references to wireframes | UX | Week 4 |
-| `docs/traceability-matrix.md` | Story ↔ architecture ↔ UX mapping | PM | Week 4 |
+| Deliverable                        | Description                                                                           | Owner             | Due    |
+| ---------------------------------- | ------------------------------------------------------------------------------------- | ----------------- | ------ |
+| `docs/architecture.md` (expanded)  | Complete specifications for runtime, connectors, credential vault, logging, installer | Architecture Lead | Week 2 |
+| `docs/user-stories/*.md`           | Collection of user story files grouped by epic                                        | Product/BA        | Week 3 |
+| `docs/ux/wireframes/*.md` + assets | Wireframe images or ASCII diagrams with annotations                                   | UX                | Week 4 |
+| `docs/ux/flows.md` (final)         | Updated narrative flows with references to wireframes                                 | UX                | Week 4 |
+| `docs/traceability-matrix.md`      | Story ↔ architecture ↔ UX mapping                                                   | PM                | Week 4 |
 
 ## Timeline (4-Week Sprint)
 
 ### Week 1: Kickoff & Architecture Deep Dive
+
 - Conduct workshops on workflow engine, triggers, and credential handling.
 - Draft architecture outline; identify open technical questions.
 - Inventory existing docs; align on template formats for stories and wireframes.
 
 ### Week 2: Architecture Finalization
+
 - Produce detailed diagrams and schemas.
 - Review connector contracts with engineering stakeholders.
 - Document logging, telemetry, installer flows.
 - Hold architecture sign-off review.
 
 ### Week 3: User Story Development
+
 - Write epics and user stories with AC.
 - Validate stories with UX to ensure coverage of flows.
 - Create traceability matrix draft.
 - Stakeholder review and revisions.
 
 ### Week 4: UX Wireframes & Integration
+
 - Generate wireframes (hi-fi or annotated low-fi) for all core screens.
 - Update narrative flows to reference wireframes and story AC.
 - Finalize traceability matrix and gather approvals.
@@ -108,4 +113,3 @@ Deliver complete application specifications covering:
 - UX package includes wireframes for all core screens plus CLI references.
 - Traceability matrix links stories, architecture components, and UX artifacts.
 - Team is ready to enter implementation planning with a well-scoped backlog.
-

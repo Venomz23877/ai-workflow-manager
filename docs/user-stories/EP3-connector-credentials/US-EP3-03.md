@@ -48,4 +48,3 @@ Then the command performs the same validation and surfaces status
 - Provide optional usage limits metadata.
 - Reuse shared validation component for connectors.
 - Open questions: Should we allow connectors to auto-select fallback keys per workflow?
-

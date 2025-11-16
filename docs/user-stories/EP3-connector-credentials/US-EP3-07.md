@@ -48,4 +48,3 @@ Then the UI reflects updated status badges without needing a restart
 - Logging: all CLI credential changes recorded with user identity (via OS login).
 - Provide non-interactive mode using env vars or `--key-file`.
 - Open questions: How do we authenticate CLI users on shared machines?
-

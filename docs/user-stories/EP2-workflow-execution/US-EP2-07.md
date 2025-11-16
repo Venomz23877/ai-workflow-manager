@@ -48,4 +48,3 @@ Then the system logs the action with operator identity and timestamp
 - Provide sanitized filenames and ensure secret redaction.
 - CLI command should support `--filter pdf` etc.
 - Open questions: Offer direct link to open in external viewer vs internal preview?
-

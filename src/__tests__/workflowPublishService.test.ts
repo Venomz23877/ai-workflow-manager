@@ -49,4 +49,3 @@ describe('WorkflowPublishService', () => {
     expect(() => publishService.publishDraft(invalidDraft.id)).toThrow(/failed validation/)
   })
 })
-

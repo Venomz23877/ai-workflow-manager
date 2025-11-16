@@ -85,4 +85,3 @@
 ## References
 
 - `docs/ux/narratives/settings.md`
-

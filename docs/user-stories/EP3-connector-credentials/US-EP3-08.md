@@ -48,4 +48,3 @@ Then the UI marks features as “Coming soon” or “Upgrade required”
 - Provide caching and offline fallback.
 - CLI should support `--format table`/`json`.
 - Open questions: Do we allow custom connectors to define their own capability schema?
-

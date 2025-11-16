@@ -48,4 +48,3 @@ Then onboarding hints detect it was created via CLI and surface recent CLI actio
 - Output includes new workflow ID/slug and instructions to open in UI (`aiwm workflows open <slug>`).
 - Scaffold logic reuses duplication/export codepaths to avoid drift.
 - Open questions: Do we allow inline JSON definitions of nodes during scaffolding?
-

@@ -58,4 +58,3 @@ Then the Test Console flags the missing configuration and prevents execution unt
 - Results normalized to `{suiteId, status, durationMs, artifacts[]}` and cached locally for offline review.
 - Streaming logs through IPC channel with backpressure handling; truncate to avoid freezing renderer.
 - CLI command fallback ensures parity between UI and automation pipelines.
-

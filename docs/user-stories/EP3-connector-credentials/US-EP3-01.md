@@ -44,4 +44,3 @@ Then restricted connectors appear read-only with lock icon and explanatory text
 - Need API endpoint for listing connectors, statuses, last test results.
 - CLI reuse: `aiwm connectors list --json`.
 - Open questions: Do we allow per-workflow overrides from this view?
-

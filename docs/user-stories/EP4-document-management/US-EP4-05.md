@@ -55,4 +55,3 @@ Then an audit entry records operator, timestamp, run ID, and included files
 - Bundler should support streaming ZIP creation to avoid memory spikes.
 - Include metadata JSON describing each artifact, hashed for integrity.
 - Provide asynchronous export when bundle generation is heavy (optional toast + notification).
-

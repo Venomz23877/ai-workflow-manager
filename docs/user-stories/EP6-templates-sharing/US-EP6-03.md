@@ -54,4 +54,3 @@ Then the tool runs diff, merges changes (with conflict prompts), and updates the
 
 - Maintain mapping between template version and workflows (stored in registry).
 - Diff engine highlights structural differences; manual merge UI out of scope for MVP but flagged as future.
-

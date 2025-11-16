@@ -55,4 +55,3 @@ Then secret values aren’t stored directly; only metadata/IDs included, with in
 - Archive format: encrypted ZIP/tar with manifest, hashed for integrity.
 - Provide retention policy config & cleanup job.
 - Restore runs validations before applying; partial failure triggers rollback + report.
-

@@ -20,10 +20,13 @@ interface Window {
       bundle: import('../shared/testRunnerTypes').TestRunBundle
     ) => Promise<{ path?: string; canceled: boolean }>
     listWorkflowDrafts: () => Promise<import('../core/workflows/workflowTypes').WorkflowDraft[]>
-    getWorkflowDraft: (id: number) => Promise<import('../core/workflows/workflowTypes').WorkflowDraft | null>
-    createWorkflowDraft: (payload: { name: string; description?: string }) => Promise<
-      import('../core/workflows/workflowTypes').WorkflowDraft
-    >
+    getWorkflowDraft: (
+      id: number
+    ) => Promise<import('../core/workflows/workflowTypes').WorkflowDraft | null>
+    createWorkflowDraft: (payload: {
+      name: string
+      description?: string
+    }) => Promise<import('../core/workflows/workflowTypes').WorkflowDraft>
     updateWorkflowDraft: (
       id: number,
       input: import('../core/workflows/workflowTypes').WorkflowDraftUpdateInput
@@ -38,7 +41,10 @@ interface Window {
     ) => Promise<import('../core/workflows/workflowTypes').WorkflowDraftValidationResult>
     publishWorkflowDraft: (
       id: number
-    ) => Promise<{ workflow: import('../core/database').Workflow; draft: import('../core/workflows/workflowTypes').WorkflowDraft }>
+    ) => Promise<{
+      workflow: import('../core/database').Workflow
+      draft: import('../core/workflows/workflowTypes').WorkflowDraft
+    }>
     listDocuments: () => Promise<import('../core/documents/documentRegistry').DocumentRecord[]>
     exportDocument: (
       payload: import('../core/documents/documentService').ExportDocumentPayload

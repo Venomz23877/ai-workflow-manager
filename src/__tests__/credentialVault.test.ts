@@ -44,4 +44,13 @@ describe('CredentialVault (JSON fallback)', () => {
     const secrets = await vault.listSecrets('connector:llm')
     expect(secrets).toHaveLength(2)
   })
+
+  it('falls back to JSON when OS provider unavailable or forced', async () => {
+    process.env.AIWM_FORCE_JSON_VAULT = '1'
+    const vault = new CredentialVault({ provider: 'os', fallbackDir: dir })
+    await vault.storeSecret({ key: 'connector:test:os', value: 'secret-os' })
+    const secret = await vault.retrieveSecret('connector:test:os')
+    expect(secret?.value).toBe('secret-os')
+    delete process.env.AIWM_FORCE_JSON_VAULT
+  })
 })

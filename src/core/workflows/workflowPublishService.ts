@@ -33,4 +33,3 @@ export class WorkflowPublishService {
     return { workflow, draft: this.draftService.getDraft(draft.id)! }
   }
 }
-

@@ -55,4 +55,3 @@ Then I receive the same metadata plus references to dependent workflow nodes
 - Template metadata table includes `format`, `tags`, `version`, `usage_count`.
 - Need referential integrity between templates and workflows; deletion requires fallback assignment.
 - Provide CLI parity for list/duplicate/delete/attach.
-

@@ -42,24 +42,24 @@ AI Workflow Manager is an Electron-based desktop application with a React render
 
 ### Connector (Ports & Adapters) Pattern
 
-1. **Port Interfaces**  
-   - `WorkflowDataPort`: CRUD, query, transaction support for workflows/runs.  
+1. **Port Interfaces**
+   - `WorkflowDataPort`: CRUD, query, transaction support for workflows/runs.
    - `ConnectorRegistryPort`: service for registering/resolving outbound adapters at runtime.
 
-2. **Adapters**  
-   - `LocalSqliteAdapter` implements ports by delegating to repositories.  
-   - `RestApiAdapter` (future) acts as outbound adapter translating domain operations to HTTP requests.  
+2. **Adapters**
+   - `LocalSqliteAdapter` implements ports by delegating to repositories.
+   - `RestApiAdapter` (future) acts as outbound adapter translating domain operations to HTTP requests.
    - Additional adapters (DynamoDB, etc.) implement the same port; adapters can be decorated for retries/logging.
 
-3. **Configuration & Discovery**  
-   - Registry maps configuration keys to adapter factories; supports lazy instantiation and hot-swapping.  
+3. **Configuration & Discovery**
+   - Registry maps configuration keys to adapter factories; supports lazy instantiation and hot-swapping.
    - Application services query the registry via the port, avoiding direct adapter knowledge.
 
-4. **Cross-Cutting Concerns**  
-   - Decorators implement resilience (circuit breaker, retry with exponential backoff, caching).  
+4. **Cross-Cutting Concerns**
+   - Decorators implement resilience (circuit breaker, retry with exponential backoff, caching).
    - Observability injects instrumentation (metrics, traces) without polluting domain logic.
 
-5. **IPC Exposure**  
+5. **IPC Exposure**
    - Inbound adapters (renderer/CLI) call application services. Services interact with ports; infrastructure decides which adapter backs the port. This preserves the hexagonal boundary.
 
 ### Data Flow Example
@@ -80,21 +80,21 @@ Switching to a REST backend only changes configuration: the factory instantiates
 
 ## Workflow Engine
 
-- **State Machine Runtime**  
-  - Implemented using the State pattern (or `xstate`) with explicit state charts for each workflow. Nodes map to states; triggers become events; validators act as guards.  
+- **State Machine Runtime**
+  - Implemented using the State pattern (or `xstate`) with explicit state charts for each workflow. Nodes map to states; triggers become events; validators act as guards.
   - Command handlers (`StartWorkflowCommand`, `TriggerActionCommand`, etc.) coordinate state transitions and publish domain events.
 
-- **Node Definitions**  
+- **Node Definitions**
   - Each node type describes entry actions, exit actions, available user actions, triggers, and validators. Definitions live as domain configuration objects independent of UI. See `docs/workflow-engine.md` for semantics.
 
-- **Execution Managers**  
-  - Long-running actions executed by background workers using Command pattern to encapsulate side effects.  
+- **Execution Managers**
+  - Long-running actions executed by background workers using Command pattern to encapsulate side effects.
   - Domain events published via `WorkflowEventPublisher` to observers (log, notification, UI).
 
-- **Persistence**  
+- **Persistence**
   - Repositories maintain workflow definitions and run state snapshots. Commands mutate aggregates; queries read from repositories. CQRS separation (lightweight) ensures UI reads don’t depend on write model internals.
 
-- **CLI/Renderer Integration**  
+- **CLI/Renderer Integration**
   - Inbound adapters translate user interactions into commands; outbound events streamed back to UI/CLI observers.
 
 ## LLM Connector Strategy
@@ -152,27 +152,27 @@ Switching to a REST backend only changes configuration: the factory instantiates
 
 ## Security, Logging, and Operations
 
-- **Credential Vault**  
-  - Vault port implemented by platform-specific adapters; decorated with audit logging and caching.  
-  - Supports rotation workflows, master password fallback, and CLI access.  
+- **Credential Vault**
+  - Vault port implemented by platform-specific adapters; decorated with audit logging and caching.
+  - Supports rotation workflows, master password fallback, and CLI access.
   - Secrets retrieved on-demand; domain services receive opaque tokens or client instances rather than raw keys.
 
-- **Logging/Telemetry**  
-  - `WorkflowEventPublisher` acts as central observer hub. Logging adapters subscribe to publish structured JSON logs.  
-  - Telemetry exporters (future) subscribe separately to send anonymized metrics.  
+- **Logging/Telemetry**
+  - `WorkflowEventPublisher` acts as central observer hub. Logging adapters subscribe to publish structured JSON logs.
+  - Telemetry exporters (future) subscribe separately to send anonymized metrics.
   - Ensure correlation IDs propagate through commands/events for traceability.
 
-- **Testing Strategy**  
-  - Separate command-handling tests (domain), adapter contract tests, and end-to-end scenario tests.  
+- **Testing Strategy**
+  - Separate command-handling tests (domain), adapter contract tests, and end-to-end scenario tests.
   - Use mock adapters for connectors in unit tests; integration tests run against SQLite fixture.
-- **In-App Test Console**  
-  - Renderer diagnostics screen that lists automated component tests (unit smoke, integration harnesses, CLI checks) and allows running them directly from the UI.  
-  - Main process exposes a `TestRunnerService` that spawns test commands/scripts and streams results back to the renderer via IPC, storing summaries for later review.  
-  - Supports filtering tests by component (WorkflowRuntime, ConnectorRegistry, DocumentBuilder, etc.) and captures logs/artifacts (e.g., JSON reports) for download.  
+- **In-App Test Console**
+  - Renderer diagnostics screen that lists automated component tests (unit smoke, integration harnesses, CLI checks) and allows running them directly from the UI.
+  - Main process exposes a `TestRunnerService` that spawns test commands/scripts and streams results back to the renderer via IPC, storing summaries for later review.
+  - Supports filtering tests by component (WorkflowRuntime, ConnectorRegistry, DocumentBuilder, etc.) and captures logs/artifacts (e.g., JSON reports) for download.
   - Integrates with AuditLogService and NotificationService to record test executions and alert on failures.
 
-- **Packaging Considerations**  
-  - Installer runs migration commands, seeds sample workflows, and verifies vault availability.  
+- **Packaging Considerations**
+  - Installer runs migration commands, seeds sample workflows, and verifies vault availability.
   - Error handling includes rollback strategy if migrations fail.
 
 ## Architecture Expansion Work Items
@@ -180,61 +180,64 @@ Switching to a REST backend only changes configuration: the factory instantiates
 The following sections outline specifications that remain to be fully defined. Each subsection will be expanded during the current specification sprint.
 
 ### Workflow State & Persistence Model
-- **Domain Schema**  
-  - `workflows` table (id, name, description, status, version, created_at, updated_at).  
-  - `workflow_versions` table for immutable snapshots (workflow_id, version_number, definition_json, changelog, created_by).  
-  - `workflow_nodes` table (id, workflow_version_id, type, label, entry_actions_json, exit_actions_json, metadata_json).  
-  - `workflow_transitions` table (id, workflow_version_id, source_node_id, target_node_id, trigger_config_json, validator_config_json).  
+
+- **Domain Schema**
+  - `workflows` table (id, name, description, status, version, created_at, updated_at).
+  - `workflow_versions` table for immutable snapshots (workflow_id, version_number, definition_json, changelog, created_by).
+  - `workflow_nodes` table (id, workflow_version_id, type, label, entry_actions_json, exit_actions_json, metadata_json).
+  - `workflow_transitions` table (id, workflow_version_id, source_node_id, target_node_id, trigger_config_json, validator_config_json).
   - `workflow_templates` table referencing curated, reusable definitions.
-- **Runtime State**  
-  - `workflow_runs` table (id, workflow_version_id, status, started_at, completed_at, current_node_id, context_json).  
-  - `workflow_run_events` table (timestamp, run_id, type, payload_json, emitter) to record node entry/exit, trigger evaluation, validator outcomes.  
+- **Runtime State**
+  - `workflow_runs` table (id, workflow_version_id, status, started_at, completed_at, current_node_id, context_json).
+  - `workflow_run_events` table (timestamp, run_id, type, payload_json, emitter) to record node entry/exit, trigger evaluation, validator outcomes.
   - Snapshots stored as compressed JSON blobs capturing `context_json` plus node-specific state to enable pause/resume.
 - **Runtime Services**
   - `RunStateSnapshotService` captures/restores snapshots for pause/resume/restart scenarios, coordinating with WorkflowRuntime and persistence layer.
-- **Storage Strategy**  
-  - Use normalized SQLite schema for queryability; keep versioned definitions as JSON to preserve structure with minimal migrations.  
-  - Apply migration tooling (e.g., `better-sqlite3-migrations`) with semantic versioning of schema.  
+- **Storage Strategy**
+  - Use normalized SQLite schema for queryability; keep versioned definitions as JSON to preserve structure with minimal migrations.
+  - Apply migration tooling (e.g., `better-sqlite3-migrations`) with semantic versioning of schema.
   - Maintain at least the last 10 workflow versions locally; allow configuration to purge older versions.
-- **Versioning Policy**  
-  - Auto-increment version on “publish” events; drafts stored in `workflow_drafts` table until published.  
-  - Support diff by comparing `definition_json`; future enhancement: JSON diff viewer in UI.  
+- **Versioning Policy**
+  - Auto-increment version on “publish” events; drafts stored in `workflow_drafts` table until published.
+  - Support diff by comparing `definition_json`; future enhancement: JSON diff viewer in UI.
   - Branching/version comparisons deferred—track as Future Work.
-- **Snapshots & Auditing**  
-  - Capture snapshot on pause, manual save, and prior to upgrade migrations.  
+- **Snapshots & Auditing**
+  - Capture snapshot on pause, manual save, and prior to upgrade migrations.
   - Retain run events for 90 days (configurable); export CLI command to archive older history.
-- **Open Questions**  
-  - Should we encrypt portions of `context_json` that may contain sensitive AI inputs?  
-  - Do we need referential integrity between templates and workflows for governance?  
+- **Open Questions**
+  - Should we encrypt portions of `context_json` that may contain sensitive AI inputs?
+  - Do we need referential integrity between templates and workflows for governance?
   - What is the default retention period for completed run snapshots?
 
 ### Trigger & Event Engine
-- **Core Concepts**  
-  - Event bus runs inside the main process using typed channels (`workflow:trigger`, `workflow:validator`, `workflow:loop`).  
-  - Supports priority queue (Immediate > Scheduled > Deferred) with configurable concurrency per workflow.  
+
+- **Core Concepts**
+  - Event bus runs inside the main process using typed channels (`workflow:trigger`, `workflow:validator`, `workflow:loop`).
+  - Supports priority queue (Immediate > Scheduled > Deferred) with configurable concurrency per workflow.
   - Events persisted to `workflow_run_events` table to allow replay and debugging.
-- **Trigger Evaluation**  
-  - Immediate triggers fire synchronously after entry/exit actions complete; validators run before transition commits.  
-  - Scheduled triggers register with a timer service (setInterval equivalent) stored in `workflow_run_schedules`.  
+- **Trigger Evaluation**
+  - Immediate triggers fire synchronously after entry/exit actions complete; validators run before transition commits.
+  - Scheduled triggers register with a timer service (setInterval equivalent) stored in `workflow_run_schedules`.
   - External triggers (CLI commands, webhook integrations) enqueue events via IPC API; require authentication layer.
-- **Validator Execution**  
-  - Validators execute in defined order; failure short-circuits transition and raises `validator_failed` event.  
-  - Provide retry count and cool-down configuration to avoid rapid re-fire.  
+- **Validator Execution**
+  - Validators execute in defined order; failure short-circuits transition and raises `validator_failed` event.
+  - Provide retry count and cool-down configuration to avoid rapid re-fire.
   - Validation results surfaced to UI via IPC stream and recorded in run events.
-- **Loop Management**  
-  - Loop nodes maintain iteration counters within `context_json`; guardrails enforce max iterations, timeout, and manual override flag.  
-  - `loop_iteration` events log each cycle; `loop_throttle` policy prevents rapid loops (e.g., minimum delay config).  
+- **Loop Management**
+  - Loop nodes maintain iteration counters within `context_json`; guardrails enforce max iterations, timeout, and manual override flag.
+  - `loop_iteration` events log each cycle; `loop_throttle` policy prevents rapid loops (e.g., minimum delay config).
   - Manual break triggers set `loop.break=true` in context and transition to fallback node.
-- **Error Handling & Observability**  
-  - Failed triggers/validators captured with stack traces; error severity dictates whether workflow pauses or continues.  
-  - Notification subsystem (UI toast + optional email future) subscribes to failure events.  
+- **Error Handling & Observability**
+  - Failed triggers/validators captured with stack traces; error severity dictates whether workflow pauses or continues.
+  - Notification subsystem (UI toast + optional email future) subscribes to failure events.
   - Provide CLI command to inspect pending trigger queue and force execution.
-- **Open Questions**  
-  - Should we expose a declarative schedule syntax (cron-like) for scheduled triggers?  
-  - How do we authenticate or rate limit external trigger sources (webhook security)?  
+- **Open Questions**
+  - Should we expose a declarative schedule syntax (cron-like) for scheduled triggers?
+  - How do we authenticate or rate limit external trigger sources (webhook security)?
   - Do we allow custom validator scripting in early versions or limit to predefined actions?
 
 ### Credential Vault Implementation
+
 - Enumerate target keychain providers (Windows Credential Manager, macOS Keychain, Linux Secret Service) and fallback encrypted file format.
 - Define vault API (save, retrieve, rotate, audit) plus CLI bindings.
 - Plan for backup/export and multi-user machine considerations.
@@ -243,6 +246,7 @@ The following sections outline specifications that remain to be fully defined. E
   - How do we handle headless/server deployments?
 
 ### Document Template Registry
+
 - Describe template catalog storage (database tables + filesystem pointers).
 - Capture dependency graph between templates and workflow nodes for change detection.
 - Plan version metadata, approval workflows, and rollback behavior.
@@ -251,6 +255,7 @@ The following sections outline specifications that remain to be fully defined. E
   - Should templates live inside user profiles or shared workspace directories?
 
 ### LLM Connector Lifecycle
+
 - Specify rate limit handling, exponential backoff, and circuit breaker rules.
 - Define streaming protocol support and content filtering hooks.
 - Determine prompt/response logging retention respecting security requirements.
@@ -259,6 +264,7 @@ The following sections outline specifications that remain to be fully defined. E
   - How do we redact sensitive inputs before logging?
 
 ### Logging & Telemetry Pipeline
+
 - Choose log format (structured JSON) and storage location per platform.
 - Decide on local viewer vs external export, plus retention/rotation policies.
 - Plan opt-in telemetry upload (if any) with anonymization steps.
@@ -267,6 +273,7 @@ The following sections outline specifications that remain to be fully defined. E
   - How are user-submitted error reports packaged?
 
 ### Installer & First-Run Initialization
+
 - Map native dependencies (better-sqlite3, docx, pdf-lib) to packaging steps.
 - Define first-run wizard tasks (create data directories, prompt for credentials, import sample workflows).
 - Plan upgrade strategy (migration scripts, backup automation).
@@ -275,6 +282,7 @@ The following sections outline specifications that remain to be fully defined. E
   - What telemetry (if any) confirms successful activation?
 
 ### Collaboration & Sharing Roadmap
+
 - Outline export/import format for workflows and templates (JSON, signed packages).
 - Consider future multi-user synchronization (shared folders, git integration, remote store).
 - Identify short-term sharing mechanisms (manual export, CLI commands).
@@ -290,7 +298,7 @@ The following sections outline specifications that remain to be fully defined. E
 
 ## Configuration Management
 
-- Centralize runtime configuration (connector selection, API endpoints, auth) under `src/core/config/`.  
+- Centralize runtime configuration (connector selection, API endpoints, auth) under `src/core/config/`.
 - Provide environment-aware defaults and allow overrides through CLI flags, GUI settings screens, or environment variables.
 - `ConfigService` exposes typed getters/setters consumed by renderer settings panels, CLI, and background services.
 - `NotificationPreferenceService` stores per-user alert preferences and quiet hours, sharing the same persistence layer as other settings.
@@ -309,4 +317,3 @@ The following sections outline specifications that remain to be fully defined. E
 - Quick start and packaging steps: `QUICKSTART.md`, `README.md`
 - Process guardrails: `.cursor/rules/`
 - Session history and objectives: `.ai_working/wrapup.md`
-

@@ -34,4 +34,3 @@ Press `q` to exit, `json` to toggle JSON output.
 ## References
 
 - `docs/ux/narratives/cli-companion.md`
-

@@ -48,4 +48,3 @@ Then publishing is disabled and a banner explains which issues remain
 - Support warnings vs errors; warnings allow publish with confirmation.
 - CLI command shares backend logic to avoid drift.
 - Open questions: Should we allow inline “snooze” of warnings for drafts?
-

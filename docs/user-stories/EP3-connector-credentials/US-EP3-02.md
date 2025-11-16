@@ -48,4 +48,3 @@ Then the command prompts for the key, tests it, and updates the same status indi
 - Store metadata (created_by, last_tested_at).
 - Provide test endpoint stub for offline mode.
 - Open questions: Do we support multiple ChatGPT profiles (prod/sandbox)?
-

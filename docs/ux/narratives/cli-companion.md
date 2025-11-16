@@ -13,14 +13,14 @@ The CLI mirrors the desktop experience for operators and integrators who prefer 
 
 ## Command Surface Highlights
 
-| Command | Purpose | Notes |
-|---------|---------|-------|
-| `aiwm workflows list` | List workflows with status, last run | Supports filters `--status draft`, `--tag marketing` |
-| `aiwm workflows run <slug>` | Start a workflow run | Flags for run context (`--llm chatgpt`, `--doc draft.md`) |
-| `aiwm runs monitor <runId>` | Stream execution events/logs | ASCII timeline, `--json` for machine output |
-| `aiwm docs edit <docId>` | Launch document editor in terminal | Integration with `$EDITOR`, diff preview |
-| `aiwm connectors credentials set <name>` | Store API keys securely | Prompts hidden input; success confirmation |
-| `aiwm settings export/import` | Backup or restore configuration | Requires confirmation and audit log entry |
+| Command                                  | Purpose                              | Notes                                                     |
+| ---------------------------------------- | ------------------------------------ | --------------------------------------------------------- |
+| `aiwm workflows list`                    | List workflows with status, last run | Supports filters `--status draft`, `--tag marketing`      |
+| `aiwm workflows run <slug>`              | Start a workflow run                 | Flags for run context (`--llm chatgpt`, `--doc draft.md`) |
+| `aiwm runs monitor <runId>`              | Stream execution events/logs         | ASCII timeline, `--json` for machine output               |
+| `aiwm docs edit <docId>`                 | Launch document editor in terminal   | Integration with `$EDITOR`, diff preview                  |
+| `aiwm connectors credentials set <name>` | Store API keys securely              | Prompts hidden input; success confirmation                |
+| `aiwm settings export/import`            | Backup or restore configuration      | Requires confirmation and audit log entry                 |
 
 ## Output Patterns
 
@@ -53,4 +53,3 @@ The CLI mirrors the desktop experience for operators and integrators who prefer 
 
 - `docs/ux-flows.md#E.-CLI-Driven-Execution`
 - `docs/user-requirements.md` — CLI objectives
-

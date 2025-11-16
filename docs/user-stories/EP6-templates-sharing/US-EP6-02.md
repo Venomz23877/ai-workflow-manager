@@ -54,4 +54,3 @@ Then the command validates, publishes, and prints template ID/version
 
 - Template entry stores pointer to workflow definition version plus document/template dependencies.
 - Consider approval workflow for template publishing (future).
-

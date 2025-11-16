@@ -24,4 +24,3 @@
 ## References
 
 - `docs/ux/narratives/document-workspace.md`
-

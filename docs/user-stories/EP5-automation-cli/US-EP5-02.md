@@ -55,4 +55,3 @@ Then I obtain a JSON file for backup/import
 - Cron expressions parsed via node-cron or similar; support timezone selection.
 - Schedules persisted in SQLite (`workflow_schedules` table) referencing workflow version/profile.
 - Provide locking to prevent overlapping runs (configurable).
-

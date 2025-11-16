@@ -55,4 +55,3 @@ Then the system flags dependent nodes for revalidation and displays a banner sum
 - Editor built on Monaco/CodeMirror with markdown/HTML modes and accessibility support.
 - Preview uses sanitized HTML renderer, inline CSS respecting theme.
 - Autosave leverages debounced persistence; collisions handled via revision system (US-EP4-04).
-

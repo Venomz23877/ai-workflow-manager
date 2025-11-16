@@ -41,16 +41,16 @@ The designer canvas is the creative heart of AI Workflow Manager. When a workflo
 
 ## Interaction Contracts
 
-| Scenario | Input | System Reaction | Outbound Events |
-|----------|-------|-----------------|-----------------|
-| Add node via drag | Pointer drag from palette to canvas drop | Node entity created, selected; command dispatched (`AddNodeCommand`) | `workflow.node.added`, draft auto-save request |
-| Add node via keyboard | `Ctrl+N`, node type selection dialog | Node placed near current focus, label input engaged | `workflow.node.added` |
-| Rename node | Focus node, press `Enter`, submit text | Update node label in domain model, optimistic UI update | `workflow.node.renamed` |
-| Connect nodes | Pointer drag or keyboard connect mode | Transition entity created; transition inspector opens | `workflow.transition.created` |
-| Remove transition | Delete key or context menu | Transition deleted; canvas rerenders, undo entry logged | `workflow.transition.deleted` |
-| Undo/Redo | `Ctrl+Z` / `Ctrl+Shift+Z` | Command dispatcher replays event log to prior state | `workflow.command.undo`, `workflow.command.redo` |
-| Auto-save | Idle > 5s or explicit save | Draft persisted through repository; toast shown | `workflow.draft.saved`, `workflow.autosave.succeeded` |
-| Validation run | Click “Validate” | Domain validation service executes; issues surfaced | `workflow.validation.completed` (with status) |
+| Scenario              | Input                                    | System Reaction                                                      | Outbound Events                                       |
+| --------------------- | ---------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------- |
+| Add node via drag     | Pointer drag from palette to canvas drop | Node entity created, selected; command dispatched (`AddNodeCommand`) | `workflow.node.added`, draft auto-save request        |
+| Add node via keyboard | `Ctrl+N`, node type selection dialog     | Node placed near current focus, label input engaged                  | `workflow.node.added`                                 |
+| Rename node           | Focus node, press `Enter`, submit text   | Update node label in domain model, optimistic UI update              | `workflow.node.renamed`                               |
+| Connect nodes         | Pointer drag or keyboard connect mode    | Transition entity created; transition inspector opens                | `workflow.transition.created`                         |
+| Remove transition     | Delete key or context menu               | Transition deleted; canvas rerenders, undo entry logged              | `workflow.transition.deleted`                         |
+| Undo/Redo             | `Ctrl+Z` / `Ctrl+Shift+Z`                | Command dispatcher replays event log to prior state                  | `workflow.command.undo`, `workflow.command.redo`      |
+| Auto-save             | Idle > 5s or explicit save               | Draft persisted through repository; toast shown                      | `workflow.draft.saved`, `workflow.autosave.succeeded` |
+| Validation run        | Click “Validate”                         | Domain validation service executes; issues surfaced                  | `workflow.validation.completed` (with status)         |
 
 Each contract ties UI gestures to command handlers and event emissions, ensuring renderer and CLI observers stay in sync.
 
@@ -79,4 +79,3 @@ Each contract ties UI gestures to command handlers and event emissions, ensuring
 - User stories: `US-EP1-01`, `US-EP1-02` (additional to be linked).
 - Architecture: Workflow state & persistence, trigger engine sections.
 - Execution flows: `docs/ux-flows.md#A.-Designing-a-New-Workflow`.
-

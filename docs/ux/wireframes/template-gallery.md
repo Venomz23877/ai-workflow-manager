@@ -38,4 +38,3 @@
 
 - `docs/ux/narratives/template-gallery.md`
 - `docs/user-stories/EP6-templates-sharing/`
-

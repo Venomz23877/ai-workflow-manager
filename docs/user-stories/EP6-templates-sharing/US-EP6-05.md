@@ -55,4 +55,3 @@ Then the same role mappings update
 - Store roles per template (owner, reviewer, consumer groups).
 - Integrate with org directory or local role definitions.
 - Provide API for future UI for approvals (modal, notifications).
-

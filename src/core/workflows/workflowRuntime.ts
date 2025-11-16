@@ -1,10 +1,6 @@
 import { EventEmitter } from 'events'
 import { randomUUID } from 'crypto'
-import {
-  WorkflowDraft,
-  WorkflowRuntimeInstance,
-  WorkflowRuntimeStatus
-} from './workflowTypes'
+import { WorkflowDraft, WorkflowRuntimeInstance, WorkflowRuntimeStatus } from './workflowTypes'
 import { ValidationService } from './validationService'
 
 export type WorkflowRuntimeEvent =
@@ -85,4 +81,3 @@ export class WorkflowRuntime extends EventEmitter {
     return instance
   }
 }
-

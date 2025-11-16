@@ -55,4 +55,3 @@ Then exit codes align with severity (e.g., 2 for validation failure, 3 for conne
 - Implement streaming via RxJS/EventSource pattern; allow buffering for file writes.
 - Provide `--format card|table|json`.
 - Document exit code matrix in CLI help.
-

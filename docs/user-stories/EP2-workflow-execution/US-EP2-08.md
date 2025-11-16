@@ -48,4 +48,3 @@ Then permission checks enforce the rule and instruct me to request approval
 - Implementation should create new run record referencing `parent_run_id`.
 - CLI should support `--new-version` to restart against updated workflow definitions.
 - Open questions: Should we restrict to same workflow version by default?
-

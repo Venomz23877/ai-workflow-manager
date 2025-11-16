@@ -48,4 +48,3 @@ Then I receive the same information (current node + timeline) formatted for term
 - Live updates via IPC/subscriptions; console should degrade gracefully if offline (pause updates, show stale notice).
 - CLI shares same event feed.
 - Open questions: do we offer filtering on timeline (actions only, validators only)?
-

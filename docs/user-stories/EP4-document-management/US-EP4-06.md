@@ -55,4 +55,3 @@ Then CLI commands still function, using the same DocumentRegistry and services
 - CLI should respect file sandbox; editing outside allowlist blocked.
 - On Windows, support `start`/`code` commands; on macOS `open`; allow custom editor command.
 - Provide `--json` outputs for automation.
-

@@ -54,4 +54,3 @@ Then the installer references those guardrails
 
 - Validation results stored in `logs/install-validation.json`.
 - Provide silent install flag `--skip-validation` (not recommended) with warning.
-

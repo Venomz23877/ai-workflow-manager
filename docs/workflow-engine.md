@@ -75,4 +75,3 @@ This document captures the initial workflow node taxonomy for AI Workflow Manage
 - Formalize these node definitions in TypeScript interfaces (e.g., `DecisionNodeConfig`, `WorkStepNodeConfig`, `LoopNodeConfig`) under `src/core/workflow/`.
 - Extend the CLI to allow creating and editing nodes with their associated actions, triggers, and validators.
 - Update the future visual designer requirements to include palettes and property panels for each node type.
-

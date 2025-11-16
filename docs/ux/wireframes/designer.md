@@ -42,4 +42,3 @@ This wireframe expands on `docs/ux/narratives/designer.md`, capturing the primar
 
 - UX narrative: `docs/ux/narratives/designer.md`
 - Architecture: Workflow authoring use cases, validation engine
-

@@ -25,21 +25,27 @@ This document outlines the high-level user experience for AI Workflow Manager, a
 ## Primary User Flows
 
 ### A. Designing a New Workflow
+
 Sasha, a workflow architect, starts on the dashboard and clicks “Create Workflow.” She chooses a blank canvas and drags a Decision node into place; the palette gently nudges her toward connecting it to a WorkStep. As she clicks each node, the property inspector narrates what it needs—“Add an entry prompt to guide the AI decision.” Sasha watches validation hints disappear as she fills in triggers, and she hits “Save Draft” knowing she can export the definition later.
 
 ### B. Configuring Connectors & Credentials
+
 Miguel opens the settings wizard to hook up his company’s AI providers. He selects ChatGPT as default, pastes the API key, and hits “Test Connection.” A green badge slides in: “Success! 100 tokens consumed in test.” He adds a fallback Claude key, sets it for a specific workflow, and whitelists the team’s project folder so document actions never stray outside approved directories.
 
 ### C. Running and Monitoring a Workflow
+
 Priya launches an existing workflow for policy review. The execution console shows the current node with a timeline of actions below. An AI-generated summary streams into view, and validators mark the result as “Needs review.” Priya manually triggers the “Request alternative summary” action; the console updates with the new output and a satisfied validator. Once complete, a “View Summary” button opens the run’s highlights and document bundle.
 
 ### D. Editing Documents within a Workflow
+
 Liam needs to tweak the onboarding guide template. From the WorkStep node, he opens the document workspace: Markdown on the left, rendered preview on the right. He edits the checklist, watches the preview update, and clicks “Save & Revalidate.” The workflow engine notes the template change and flags downstream nodes to regenerate outputs next run.
 
 ### E. CLI-Driven Execution
+
 Jess scripts a nightly job using the CLI. She runs `ai-workflow-manager workflows run compliance-check --json` and pipes the output to a log file. As the workflow progresses, the terminal prints structured messages—entries for node actions, trigger firings, document paths. When she needs to intervene, she runs `ai-workflow-manager actions invoke loop-node force-next` and sees confirmation inline.
 
 ### F. Managing Workflow Templates
+
 Nora curates templates for the support team. In the Templates panel, she duplicates the “Troubleshooting Guide” workflow, updates the metadata (“Version 2025-Q1”), and tags it for mobile products. She exports the template to share with contractors and marks the original as deprecated, prompting a banner in the designer reminding authors to upgrade.
 
 ## Interaction Guidelines
@@ -60,4 +66,3 @@ Nora curates templates for the support team. In the Templates panel, she duplica
 ---
 
 This UX reference should evolve alongside design prototypes and user testing results. Coordinate updates with `docs/architecture.md` and `docs/user-requirements.md` to keep documentation aligned.
-

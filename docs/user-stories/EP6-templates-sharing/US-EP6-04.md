@@ -55,4 +55,3 @@ Then I step through the same flow with progress feedback
 - Package format: ZIP with manifest.json, workflow definition, documents, README, signature file.
 - Signing uses optional organization certificate or hashed secret.
 - Provide version compatibility checks.
-

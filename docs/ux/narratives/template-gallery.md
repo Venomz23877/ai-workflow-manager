@@ -68,4 +68,3 @@ Preview Drawer (slides from right when open)
 - `docs/user-stories/EP6-templates-sharing/US-EP6-01.md`
 - `docs/user-stories/EP6-templates-sharing/US-EP6-02.md`
 - `docs/traceability-matrix.md` (EP6 section)
-

@@ -49,4 +49,3 @@ Then those workflows receive warnings until paths are updated
 - Provide watchers to detect directory removal and notify admins.
 - CLI should support `list`, `add`, `remove`, `set-permissions`.
 - Open questions: Do we allow environment variables or relative paths?
-

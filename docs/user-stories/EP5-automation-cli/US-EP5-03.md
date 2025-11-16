@@ -54,4 +54,3 @@ Then the command overrides the current default for that invocation only
 - Profiles stored as JSON documents referencing config tables; include connectors, file sandbox, notifications.
 - Provide encryption for profile configs containing secrets.
 - CLI should show active profile in prompts (optional).
-

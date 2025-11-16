@@ -2,7 +2,7 @@
 
 ## Overview
 
-The dashboard is the orchestrator’s home base. It answers two questions instantly: *what needs my attention?* and *what can I start next?* The layout balances monitoring (status chips, notifications) with creation affordances (CTA buttons, template gallery) so workflow architects and operators can move fluidly between drafting, running, and reviewing workflows.
+The dashboard is the orchestrator’s home base. It answers two questions instantly: _what needs my attention?_ and _what can I start next?_ The layout balances monitoring (status chips, notifications) with creation affordances (CTA buttons, template gallery) so workflow architects and operators can move fluidly between drafting, running, and reviewing workflows.
 
 ## Layout Narrative
 
@@ -55,13 +55,13 @@ The dashboard is the orchestrator’s home base. It answers two questions instan
 
 ## Interaction Contracts
 
-| Scenario | Input | System Reaction | Outbound Events |
-|----------|-------|-----------------|-----------------|
-| Start blank workflow | Click `Create Workflow → Blank` | Draft created, designer opens with onboarding hints | `workflow.draft.created` |
-| Duplicate workflow | Hover card, click `Duplicate` | Modal requests new name; copy created with status Draft | `workflow.duplicate.requested`, `workflow.draft.created` |
-| Run workflow | Click `Run` | Run context dialog collects parameters, run enqueued | `workflow.run.started` |
-| Dismiss notification | Click dismiss icon | Alert archived; snackbar confirms dismissal | `notification.dismissed` |
-| Filter by status | Click `Needs Fix` pill | Card grid re-filters; active filter badge highlighted | `workflow.library.filtered` |
+| Scenario             | Input                           | System Reaction                                         | Outbound Events                                          |
+| -------------------- | ------------------------------- | ------------------------------------------------------- | -------------------------------------------------------- |
+| Start blank workflow | Click `Create Workflow → Blank` | Draft created, designer opens with onboarding hints     | `workflow.draft.created`                                 |
+| Duplicate workflow   | Hover card, click `Duplicate`   | Modal requests new name; copy created with status Draft | `workflow.duplicate.requested`, `workflow.draft.created` |
+| Run workflow         | Click `Run`                     | Run context dialog collects parameters, run enqueued    | `workflow.run.started`                                   |
+| Dismiss notification | Click dismiss icon              | Alert archived; snackbar confirms dismissal             | `notification.dismissed`                                 |
+| Filter by status     | Click `Needs Fix` pill          | Card grid re-filters; active filter badge highlighted   | `workflow.library.filtered`                              |
 
 ## Accessibility & Inclusivity
 
@@ -87,4 +87,3 @@ The dashboard is the orchestrator’s home base. It answers two questions instan
 - `docs/ux-flows.md#A.-Designing-a-New-Workflow`
 - `docs/user-requirements.md` — Dashboard goals
 - Planned wireframes under `docs/ux/wireframes/dashboard.md` (TBD)
-

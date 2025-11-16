@@ -49,4 +49,3 @@ Then I see a banner prompting me to run migrations with CTA to open `.cursor/rul
 - Provide command to run migrations automatically after config.
 - Consider backup prompts before switching connectors.
 - Open questions: do we allow multiple storage profiles selectable per workflow?
-

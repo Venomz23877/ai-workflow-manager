@@ -48,4 +48,3 @@ Then the JSON indicates `versionStatus: draft`; exporting a published version se
 - Include checksum/hash to detect tampering.
 - Support `--include-history` flag to export multiple versions.
 - Consider signing packages in later iterations.
-

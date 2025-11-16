@@ -55,13 +55,13 @@ Settings is structured as a wizard-style experience with modular panels for conn
 
 ## Interaction Contracts
 
-| Scenario | Input | System Reaction | Outbound Events |
-|----------|-------|-----------------|-----------------|
-| Add LLM key | Paste key, click `Test & Save` | Validation call to connector; badge turns green | `credential.saved`, `connector.tested` |
-| Switch storage connector | Select different card | Confirmation dialog warns about migrations | `connector.selection.changed` |
-| Update file sandbox | Toggle directory access | Summary updates, Save enabled | `filesandbox.updated` |
-| Save settings | Click `Save All` | All sections validated; success toast | `settings.saved` |
-| Revert change | Click “Discard” next to pending edit | Field resets to last saved value | `settings.change.discarded` |
+| Scenario                 | Input                                | System Reaction                                 | Outbound Events                        |
+| ------------------------ | ------------------------------------ | ----------------------------------------------- | -------------------------------------- |
+| Add LLM key              | Paste key, click `Test & Save`       | Validation call to connector; badge turns green | `credential.saved`, `connector.tested` |
+| Switch storage connector | Select different card                | Confirmation dialog warns about migrations      | `connector.selection.changed`          |
+| Update file sandbox      | Toggle directory access              | Summary updates, Save enabled                   | `filesandbox.updated`                  |
+| Save settings            | Click `Save All`                     | All sections validated; success toast           | `settings.saved`                       |
+| Revert change            | Click “Discard” next to pending edit | Field resets to last saved value                | `settings.change.discarded`            |
 
 ## Logging & Telemetry Panels
 
@@ -98,14 +98,14 @@ Settings is structured as a wizard-style experience with modular panels for conn
 
 ## Interaction Contracts — Logging/Telemetry/Backup
 
-| Scenario | Input | System Reaction | Outbound Events |
-|----------|-------|-----------------|-----------------|
-| Change logging level | Adjust segmented control | Logger updates immediately; preview reflects new level | `logging.level.changed` |
-| Test log destination | Click `Test` | Connection test runs; success/failure banner shown | `logging.destination.tested` |
-| Enable telemetry | Toggle on + confirm | Telemetry settings saved, preview available | `telemetry.enabled` |
-| Send diagnostics once | Click button | Batches local metrics, uploads once, leaves telemetry disabled | `telemetry.diagnostics.sent` |
-| Create backup | Click `Create Backup` | BackupService packages data with progress bar | `backup.created` |
-| Restore backup | Select archive, confirm | Restore validation runs; success/failure reported | `backup.restored` |
+| Scenario              | Input                    | System Reaction                                                | Outbound Events              |
+| --------------------- | ------------------------ | -------------------------------------------------------------- | ---------------------------- |
+| Change logging level  | Adjust segmented control | Logger updates immediately; preview reflects new level         | `logging.level.changed`      |
+| Test log destination  | Click `Test`             | Connection test runs; success/failure banner shown             | `logging.destination.tested` |
+| Enable telemetry      | Toggle on + confirm      | Telemetry settings saved, preview available                    | `telemetry.enabled`          |
+| Send diagnostics once | Click button             | Batches local metrics, uploads once, leaves telemetry disabled | `telemetry.diagnostics.sent` |
+| Create backup         | Click `Create Backup`    | BackupService packages data with progress bar                  | `backup.created`             |
+| Restore backup        | Select archive, confirm  | Restore validation runs; success/failure reported              | `backup.restored`            |
 
 ## Accessibility & Inclusivity
 
@@ -132,4 +132,3 @@ Settings is structured as a wizard-style experience with modular panels for conn
 - `docs/user-requirements.md` — Credential & configuration management
 - `.cursor/rules/` for guardrails referenced in help links
 - `docs/user-stories/EP5-automation-cli/` and `EP7-platform-operations/` for logging/telemetry/backup AC
-

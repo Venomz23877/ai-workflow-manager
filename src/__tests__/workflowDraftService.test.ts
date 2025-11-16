@@ -92,4 +92,3 @@ describe('WorkflowDraftService', () => {
     expect(service.getDraft(draft.id)).toBeUndefined()
   })
 })
-

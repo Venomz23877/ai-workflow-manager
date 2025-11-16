@@ -48,4 +48,3 @@ Then each environment displays its own status badge and last-tested timestamp
 - Provide API to fetch last test results, latencies, error summaries.
 - CLI `--json` output for integration with monitoring.
 - Open questions: Should we expose test webhooks for custom connectors?
-

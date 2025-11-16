@@ -5,17 +5,16 @@ import { WorkflowDatabase } from '../core/database'
 import { ConfigService } from '../core/config/service'
 import { CredentialVault } from '../core/credentials/vault'
 import { ConnectorRegistry } from '../core/connectors/registry'
+import { ManagedConnectorDefinition } from '../core/connectors/types'
 import { getAppDatabasePath } from '../core/appPaths'
 import { AuditLogService } from '../core/audit-log'
 import { TestRunnerService } from './services/testRunner'
 import { TestRunBundle, TestRunResult } from '../shared/testRunnerTypes'
 import { FileConnector } from '../core/files/fileConnector'
 import { WorkflowDraftService } from '../core/workflows/workflowDraftService'
-import {
-  WorkflowDraftContent,
-  WorkflowDraftUpdateInput
-} from '../core/workflows/workflowTypes'
+import { WorkflowDraftContent, WorkflowDraftUpdateInput } from '../core/workflows/workflowTypes'
 import { ValidationService } from '../core/workflows/validationService'
+import { WorkflowRuntime } from '../core/workflows/workflowRuntime'
 import { DocumentRegistry } from '../core/documents/documentRegistry'
 import { DocumentService, ExportDocumentPayload } from '../core/documents/documentService'
 import { WorkflowPublishService } from '../core/workflows/workflowPublishService'
@@ -23,6 +22,8 @@ import { LoggingService } from '../core/logging/loggingService'
 import { TelemetryService } from '../core/logging/telemetryService'
 import { NotificationPreferenceService } from '../core/notifications/notificationPreferenceService'
 import { SchedulerService } from '../core/scheduler/schedulerService'
+import { SchedulerRunner } from '../core/scheduler/schedulerRunner'
+import { RetentionService } from '../core/ops/retentionService'
 import { TemplateRegistry } from '../core/templates/templateRegistry'
 
 let mainWindow: BrowserWindow | null = null
@@ -34,6 +35,7 @@ let auditLog: AuditLogService | null = null
 let fileConnector: FileConnector
 let workflowDraftService: WorkflowDraftService
 let validationService: ValidationService
+let workflowRuntime: WorkflowRuntime
 let documentRegistry: DocumentRegistry
 let documentService: DocumentService
 let workflowPublishService: WorkflowPublishService
@@ -41,6 +43,8 @@ let loggingService: LoggingService
 let telemetryService: TelemetryService
 let notificationPrefs: NotificationPreferenceService
 let schedulerService: SchedulerService
+let schedulerRunner: SchedulerRunner
+let retentionService: RetentionService
 let templateRegistry: TemplateRegistry
 const isDevelopment = process.env.NODE_ENV === 'development'
 const testRunner = new TestRunnerService()
@@ -117,9 +121,10 @@ app.whenReady().then(async () => {
   auditLog = new AuditLogService(dbPath)
   configService = new ConfigService()
   credentialVault = new CredentialVault()
-  connectorRegistry = new ConnectorRegistry()
+  connectorRegistry = new ConnectorRegistry(configService, credentialVault)
   fileConnector = new FileConnector()
   validationService = new ValidationService()
+  workflowRuntime = new WorkflowRuntime(validationService)
   workflowDraftService = new WorkflowDraftService(configService, dbPath, validationService)
   documentRegistry = new DocumentRegistry(dbPath)
   documentService = new DocumentService(documentRegistry, fileConnector)
@@ -128,6 +133,16 @@ app.whenReady().then(async () => {
   telemetryService = new TelemetryService(configService)
   notificationPrefs = new NotificationPreferenceService(configService)
   schedulerService = new SchedulerService(notificationPrefs, loggingService, dbPath)
+  retentionService = new RetentionService(configService, loggingService)
+  schedulerRunner = new SchedulerRunner(
+    schedulerService,
+    db,
+    workflowRuntime,
+    loggingService,
+    notificationPrefs,
+    retentionService
+  )
+  schedulerRunner.start()
   templateRegistry = new TemplateRegistry(dbPath)
 
   createWindow()
@@ -151,12 +166,20 @@ app.on('will-quit', () => {
   workflowDraftService?.close()
   documentRegistry?.close()
   schedulerService?.close()
+  schedulerRunner?.stop()
   templateRegistry?.close()
 })
 
 // IPC Handlers
 ipcMain.handle('get-app-version', () => {
   return app.getVersion()
+})
+
+ipcMain.handle('logging:get-path', () => loggingService.getLogPath())
+ipcMain.handle('telemetry:get-enabled', () => telemetryService.isEnabled())
+ipcMain.handle('telemetry:set-enabled', (_, enabled: boolean) => {
+  telemetryService.setEnabled(enabled)
+  return telemetryService.isEnabled()
 })
 
 ipcMain.handle('get-workflows', async () => {
@@ -220,6 +243,15 @@ ipcMain.handle('connectors:test', async (_, id: string) => {
   return connectorRegistry.testConnector(id)
 })
 
+ipcMain.handle('connectors:register', async (_, definition: ManagedConnectorDefinition) => {
+  return connectorRegistry.addManagedConnector(definition)
+})
+
+ipcMain.handle('connectors:remove', async (_, id: string) => {
+  await connectorRegistry.removeManagedConnector(id)
+  return { success: true }
+})
+
 ipcMain.handle('test-results:export', async (_, result: TestRunResult) => {
   const fileName = `test-result-${result.suiteId}-${Date.now()}.json`
   return saveJsonWithDialog(fileName, result, 'Save Test Result')
@@ -254,9 +286,8 @@ ipcMain.handle('workflow-drafts:create', (_, payload: { name: string; descriptio
   return workflowDraftService.createDraft(payload.name.trim(), payload.description)
 })
 
-ipcMain.handle(
-  'workflow-drafts:update',
-  (_, id: number, input: WorkflowDraftUpdateInput) => workflowDraftService.updateDraft(id, input)
+ipcMain.handle('workflow-drafts:update', (_, id: number, input: WorkflowDraftUpdateInput) =>
+  workflowDraftService.updateDraft(id, input)
 )
 
 ipcMain.handle('workflow-drafts:autosave', (_, id: number, content: WorkflowDraftContent) =>
@@ -268,7 +299,9 @@ ipcMain.handle('workflow-drafts:delete', (_, id: number) => {
   return { success: true }
 })
 
-ipcMain.handle('workflow-drafts:validate', (_, id: number) => workflowDraftService.validateDraft(id))
+ipcMain.handle('workflow-drafts:validate', (_, id: number) =>
+  workflowDraftService.validateDraft(id)
+)
 
 ipcMain.handle('workflow-drafts:publish', (_, id: number) => {
   const result = workflowPublishService.publishDraft(id)
@@ -318,8 +351,8 @@ ipcMain.handle('notifications:set-preferences', (_, prefs) => {
   return notificationPrefs.getPreferences()
 })
 
-ipcMain.handle('scheduler:add', (_, workflowId: number, cron: string) =>
-  schedulerService.addSchedule(workflowId, cron)
+ipcMain.handle('scheduler:add', (_, workflowId: number, cron: string, options) =>
+  schedulerService.addSchedule(workflowId, cron, options ?? {})
 )
 
 ipcMain.handle('scheduler:list', () => schedulerService.list())
@@ -331,6 +364,11 @@ ipcMain.handle('scheduler:pause', (_, id: number) => {
 
 ipcMain.handle('scheduler:resume', (_, id: number) => {
   schedulerService.resume(id)
+  return { success: true }
+})
+
+ipcMain.handle('scheduler:delete', (_, id: number) => {
+  schedulerService.delete(id)
   return { success: true }
 })
 

@@ -24,6 +24,7 @@ The team opted to forgo external design tools (e.g., Figma). UX deliverables wil
 - `src/ux-prototypes/` for coded samples (to be scaffolded later).
 
 Each file will include:
+
 1. Overview narrative referencing `docs/ux-flows.md`.
 2. ASCII sketch or layout table when necessary.
 3. Annotation list and event handling notes.
@@ -32,18 +33,18 @@ Each file will include:
 
 ## Workflow
 
-1. **Week 1 (current)**  
+1. **Week 1 (current)**
    - Finalize UX requirements, confirm screen inventory, decide sketch format per screen.
 
-2. **Week 2**  
+2. **Week 2**
    - Produce narrative drafts and accompanying ASCII sketches; review with Product/Architecture.
    - Lock interaction patterns (drag/drop behaviors, notifications, validation states).
 
-3. **Week 3**  
+3. **Week 3**
    - Implement interactive code prototypes for high-risk flows (designer drag/drop, execution console updates).
    - Document component behaviors and list reusable UI primitives.
 
-4. **Week 4**  
+4. **Week 4**
    - Polish narratives, integrate feedback, finalize accessibility notes.
    - Update `docs/ux-flows.md` to reference final wireframes.
    - Align code prototypes with architecture and story acceptance criteria.
@@ -68,4 +69,3 @@ Each file will include:
 - [ ] Schedule weekly UX review sessions.
 
 This plan keeps UX design traceable and code-adjacent, ensuring narrative flows, ASCII sketches, and runnable prototypes evolve in lockstep with user stories and architecture decisions.
-

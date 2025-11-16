@@ -38,7 +38,9 @@ export class ValidationService {
       try {
         rule(context)
       } catch (error) {
-        errors.push(`Validation rule failed: ${error instanceof Error ? error.message : String(error)}`)
+        errors.push(
+          `Validation rule failed: ${error instanceof Error ? error.message : String(error)}`
+        )
       }
     }
 
@@ -96,4 +98,3 @@ const defaultRules: ValidationRule[] = [
     }
   }
 ]
-

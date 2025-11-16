@@ -57,13 +57,13 @@ The execution console is the mission-control view for running workflows. It give
 
 ## Interaction Contracts
 
-| Scenario | Input | System Reaction | Outbound Events |
-|----------|-------|-----------------|-----------------|
-| Pause run | Click `Pause` | Run state transitions to Paused; timeline logs pause event | `workflow.run.paused` |
-| Resume run | Click `Resume` | Run state transitions to Running; node actions re-enabled | `workflow.run.resumed` |
-| Invoke action | Click `Request alternative` | Action queued, spinner shown; output appended to stream | `workflow.action.invoked` |
-| Validator failure | Validator returns false | Timeline item turns red, sidebar badge highlights error | `workflow.validator.failed` |
-| Download artifacts | Click file in Artifacts tab | File saved/opened; analytics event emitted | `workflow.artifact.downloaded` |
+| Scenario           | Input                       | System Reaction                                            | Outbound Events                |
+| ------------------ | --------------------------- | ---------------------------------------------------------- | ------------------------------ |
+| Pause run          | Click `Pause`               | Run state transitions to Paused; timeline logs pause event | `workflow.run.paused`          |
+| Resume run         | Click `Resume`              | Run state transitions to Running; node actions re-enabled  | `workflow.run.resumed`         |
+| Invoke action      | Click `Request alternative` | Action queued, spinner shown; output appended to stream    | `workflow.action.invoked`      |
+| Validator failure  | Validator returns false     | Timeline item turns red, sidebar badge highlights error    | `workflow.validator.failed`    |
+| Download artifacts | Click file in Artifacts tab | File saved/opened; analytics event emitted                 | `workflow.artifact.downloaded` |
 
 ## Accessibility & Inclusivity
 
@@ -90,4 +90,3 @@ The execution console is the mission-control view for running workflows. It give
 - `docs/ux-flows.md#C.-Running-and-Monitoring-a-Workflow`
 - `docs/user-requirements.md` — Workflow execution requirements
 - `docs/architecture.md` — Trigger & event engine, logging sections
-

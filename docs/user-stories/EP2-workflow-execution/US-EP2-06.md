@@ -48,4 +48,3 @@ Then `aiwm runs monitor` prints warning lines with red severity, along with inst
 - Notification framework should de-duplicate repeated failures.
 - CLI exit codes should indicate failure states for automation.
 - Open questions: Do we support escalation policies (notify different personas)?
-

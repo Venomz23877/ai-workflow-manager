@@ -25,4 +25,3 @@
 ## References
 
 - `docs/ux/narratives/execution-console.md`
-

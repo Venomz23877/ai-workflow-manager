@@ -6,7 +6,10 @@ import { LoggingService } from '../logging/loggingService'
 export class BackupService {
   private backupDir: string
 
-  constructor(private loggingService: LoggingService, baseDir: string = getAppDataDir()) {
+  constructor(
+    private loggingService: LoggingService,
+    baseDir: string = getAppDataDir()
+  ) {
     this.backupDir = path.join(baseDir, 'backups')
     if (!fs.existsSync(this.backupDir)) {
       fs.mkdirSync(this.backupDir, { recursive: true })
@@ -38,4 +41,3 @@ export class BackupService {
       .map((file) => path.join(this.backupDir, file))
   }
 }
-

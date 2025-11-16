@@ -48,4 +48,3 @@ Then the CLI replays the event log to revert the last change and prints summary 
 - Certain irreversible actions (deleting documents) should require confirmation before being added to stack.
 - Need guardrail for memory usage on very large workflows (cap stack length, allow manual snapshot).
 - Open questions: Do we expose history timeline UI beyond simple undo/redo?
-

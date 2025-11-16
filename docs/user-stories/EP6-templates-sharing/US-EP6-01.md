@@ -55,4 +55,3 @@ Then I see a tooltip explaining the missing connectors/documents with links to c
 - Template records include `required_connectors`, `required_documents`, `persona`, `tags`.
 - Support pagination/infinite scroll.
 - Provide caching for gallery data to avoid repeated DB hits.
-

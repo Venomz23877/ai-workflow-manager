@@ -8,6 +8,7 @@ import { AuditLogService } from '../core/audit-log'
 import { ConfigService } from '../core/config/service'
 import { CredentialVault } from '../core/credentials/vault'
 import { ConnectorRegistry } from '../core/connectors/registry'
+import { ConnectorCapability, ConnectorKind } from '../core/connectors/types'
 import { WorkflowDraftService } from '../core/workflows/workflowDraftService'
 import { WorkflowPublishService } from '../core/workflows/workflowPublishService'
 import { ValidationService } from '../core/workflows/validationService'
@@ -20,7 +21,8 @@ import { SchedulerService } from '../core/scheduler/schedulerService'
 import { NotificationPreferenceService } from '../core/notifications/notificationPreferenceService'
 import { BackupService } from '../core/ops/backupService'
 import { SecurityScanner } from '../core/ops/securityScanner'
-import { TemplateRegistry } from '../core/templates/templateRegistry'
+import { TemplatePermissionRole, TemplateRegistry } from '../core/templates/templateRegistry'
+import { TemplateManifestService } from '../core/templates/templateManifestService'
 import { TemplateDiffService } from '../core/templates/templateDiffService'
 import fs from 'fs'
 
@@ -28,7 +30,7 @@ const program = new Command()
 const auditLog = new AuditLogService(getAppDatabasePath())
 const configService = new ConfigService()
 const credentialVault = new CredentialVault()
-const connectorRegistry = new ConnectorRegistry()
+const connectorRegistry = new ConnectorRegistry(configService, credentialVault)
 const workflowDb = new WorkflowDatabase(getAppDatabasePath())
 const validationService = new ValidationService()
 const workflowDraftService = new WorkflowDraftService(configService)
@@ -47,6 +49,7 @@ const schedulerService = new SchedulerService(notificationPrefs, loggingService)
 const backupService = new BackupService(loggingService)
 const securityScanner = new SecurityScanner(loggingService)
 const templateRegistry = new TemplateRegistry()
+const templateManifestService = new TemplateManifestService(templateRegistry)
 const templateDiffService = new TemplateDiffService()
 const workflowCommand = program.command('workflow').description('Workflow operations')
 
@@ -203,18 +206,14 @@ opsCommand
 
 const backupCommand = opsCommand.command('backup').description('Backup utilities')
 
-backupCommand
-  .command('create')
-  .action(() => {
-    const file = backupService.createBackup()
-    console.log(`✅ Backup created at ${file}`)
-  })
+backupCommand.command('create').action(() => {
+  const file = backupService.createBackup()
+  console.log(`✅ Backup created at ${file}`)
+})
 
-backupCommand
-  .command('list')
-  .action(() => {
-    backupService.listBackups().forEach((file) => console.log(file))
-  })
+backupCommand.command('list').action(() => {
+  backupService.listBackups().forEach((file) => console.log(file))
+})
 
 backupCommand
   .command('restore')
@@ -238,10 +237,17 @@ scheduleCommand
   .command('add')
   .description('Add a schedule for a workflow')
   .argument('<workflowId>')
-  .argument('<cron>', 'cron expression placeholder (stored only)')
-  .action((workflowId, cron) => {
-    const schedule = schedulerService.addSchedule(parseInt(workflowId, 10), cron)
-    console.log(`✅ Schedule ${schedule.id} created for workflow ${workflowId}`)
+  .argument('<cron>', 'cron expression')
+  .option('-z, --timezone <timezone>', 'IANA timezone identifier', 'UTC')
+  .option('-p, --profile <profile>', 'Scheduler profile to use')
+  .action((workflowId, cron, options) => {
+    const schedule = schedulerService.addSchedule(parseInt(workflowId, 10), cron, {
+      timezone: options.timezone,
+      profile: options.profile
+    })
+    console.log(
+      `✅ Schedule ${schedule.id} created for workflow ${workflowId} (${schedule.timezone})`
+    )
   })
 
 scheduleCommand
@@ -251,7 +257,7 @@ scheduleCommand
     const schedules = schedulerService.list()
     schedules.forEach((schedule) => {
       console.log(
-        `[${schedule.id}] workflow ${schedule.workflowId} status ${schedule.status} next ${schedule.nextRunAt}`
+        `[${schedule.id}] workflow ${schedule.workflowId} status ${schedule.status} next ${schedule.nextRunAt} (${schedule.timezone})`
       )
     })
   })
@@ -272,15 +278,22 @@ scheduleCommand
     console.log(`▶️  Schedule ${id} resumed`)
   })
 
+scheduleCommand
+  .command('delete')
+  .argument('<id>')
+  .description('Delete a schedule')
+  .action((id) => {
+    schedulerService.delete(parseInt(id, 10))
+    console.log(`🗑️  Schedule ${id} deleted`)
+  })
+
 const notificationsCommand = program
   .command('notifications')
   .description('Notification preference commands')
 
-notificationsCommand
-  .command('get')
-  .action(() => {
-    console.log(JSON.stringify(notificationPrefs.getPreferences(), null, 2))
-  })
+notificationsCommand.command('get').action(() => {
+  console.log(JSON.stringify(notificationPrefs.getPreferences(), null, 2))
+})
 
 notificationsCommand
   .command('set')
@@ -304,6 +317,17 @@ notificationsCommand
 
 const templateCommand = program.command('template').description('Template registry commands')
 
+const parsePermissionEntry = (value: string) => {
+  const [subject, role] = value.split(':')
+  const allowed: TemplatePermissionRole[] = ['owner', 'editor', 'viewer']
+  if (!subject || !allowed.includes(role as TemplatePermissionRole)) {
+    throw new Error(
+      `Invalid permission entry "${value}". Format subject:role with role in ${allowed.join(', ')}`
+    )
+  }
+  return { subject: subject.trim(), role: role as TemplatePermissionRole }
+}
+
 templateCommand
   .command('create')
   .argument('<name>')
@@ -320,13 +344,14 @@ templateCommand
     console.log(`✅ Template ${template.id} created`)
   })
 
-templateCommand
-  .command('list')
-  .action(() => {
-    templateRegistry.listTemplates().forEach((tpl) => {
-      console.log(`[${tpl.id}] ${tpl.name} v${tpl.version}`)
-    })
+templateCommand.command('list').action(() => {
+  templateRegistry.listTemplates().forEach((tpl) => {
+    console.log(`[${tpl.id}] ${tpl.name} v${tpl.version}`)
+    console.log(
+      `  Permissions: ${tpl.permissions.map((perm) => `${perm.subject} (${perm.role})`).join(', ')}`
+    )
   })
+})
 
 templateCommand
   .command('diff')
@@ -341,6 +366,80 @@ templateCommand
       const prefix = line.added ? '+' : line.removed ? '-' : ' '
       process.stdout.write(prefix + line.value)
     })
+  })
+
+templateCommand
+  .command('export-manifest')
+  .argument('<templateId>')
+  .argument('<file>')
+  .description('Export template metadata and revisions to a manifest file')
+  .action((templateId, file) => {
+    try {
+      const output = templateManifestService.exportTemplate(parseInt(templateId, 10), file)
+      console.log(`📝 Template manifest written to ${output}`)
+    } catch (error) {
+      console.error(
+        `\n❌ Failed to export template manifest: ${
+          error instanceof Error ? error.message : String(error)
+        }\n`
+      )
+      process.exit(1)
+    }
+  })
+
+templateCommand
+  .command('import-manifest')
+  .argument('<file>')
+  .option('--name <name>', 'Optional name override')
+  .description('Import template metadata from a manifest file')
+  .action((file, options) => {
+    try {
+      const record = templateManifestService.importTemplate(file, {
+        nameOverride: options.name
+      })
+      console.log(`✅ Imported template ${record.id} (${record.name})`)
+    } catch (error) {
+      console.error(
+        `\n❌ Failed to import template manifest: ${
+          error instanceof Error ? error.message : String(error)
+        }\n`
+      )
+      process.exit(1)
+    }
+  })
+
+const permissionsCommand = templateCommand
+  .command('permissions')
+  .description('Manage template permissions')
+
+permissionsCommand
+  .command('list')
+  .argument('<templateId>')
+  .action((templateId) => {
+    const permissions = templateRegistry.getPermissions(parseInt(templateId, 10))
+    console.log(JSON.stringify(permissions, null, 2))
+  })
+
+permissionsCommand
+  .command('set')
+  .argument('<templateId>')
+  .requiredOption('--entry <subject:role>', 'Permission entry', (value, prev: string[] = []) => {
+    prev.push(value)
+    return prev
+  })
+  .action((templateId, options) => {
+    const entries: string[] = options.entry
+    if (!entries.length) {
+      console.error('Provide at least one --entry subject:role flag')
+      process.exit(1)
+    }
+    const permissions = entries.map(parsePermissionEntry)
+    const record = templateRegistry.setPermissions(parseInt(templateId, 10), permissions)
+    console.log(
+      `✅ Updated permissions for template ${record.id}: ${record.permissions
+        .map((perm) => `${perm.subject}:${perm.role}`)
+        .join(', ')}`
+    )
   })
 
 const cleanup = () => {
@@ -579,6 +678,27 @@ program
 
 const connectorCommand = program.command('connector').description('Manage connectors')
 
+const collectValues = (value: string, previous: string[] = []) => {
+  previous.push(value)
+  return previous
+}
+
+const parseCapability = (value: string): ConnectorCapability => {
+  const [name, ...descriptionParts] = value.split(':')
+  return {
+    name: name.trim(),
+    description: descriptionParts.length ? descriptionParts.join(':').trim() : undefined
+  }
+}
+
+const parseConnectorKind = (input: string): ConnectorKind => {
+  const allowed: ConnectorKind[] = ['llm', 'storage', 'document', 'integration']
+  if (!allowed.includes(input as ConnectorKind)) {
+    throw new Error(`Invalid connector kind "${input}". Use one of: ${allowed.join(', ')}`)
+  }
+  return input as ConnectorKind
+}
+
 connectorCommand
   .command('list')
   .description('List registered connectors')
@@ -599,6 +719,58 @@ connectorCommand
       }
       console.log()
     })
+  })
+
+connectorCommand
+  .command('register')
+  .description('Register a connector definition in ConfigService')
+  .argument('<id>', 'Connector identifier')
+  .requiredOption('--name <name>', 'Display name')
+  .requiredOption('--kind <kind>', 'llm|storage|document|integration')
+  .requiredOption('--version <version>', 'Connector version string')
+  .option('--description <description>', 'Optional description')
+  .option('--capability <value>', 'Capability entry (name[:description])', collectValues, [])
+  .option('--requires-secret <key>', 'Secret key required for health checks', collectValues, [])
+  .action(async (id, options) => {
+    try {
+      const capabilityOptions: string[] = options.capability ?? []
+      const requiredSecrets: string[] = options.requiresSecret ?? []
+      const summary = await connectorRegistry.addManagedConnector({
+        id,
+        name: options.name,
+        kind: parseConnectorKind(options.kind),
+        version: options.version,
+        description: options.description,
+        capabilities: capabilityOptions.map(parseCapability),
+        requiresSecrets: requiredSecrets.length ? requiredSecrets : undefined
+      })
+      console.log(`✅ Registered connector ${summary.id} (${summary.name})`)
+    } catch (error) {
+      console.error(
+        `\n❌ Failed to register connector "${id}": ${
+          error instanceof Error ? error.message : String(error)
+        }\n`
+      )
+      process.exit(1)
+    }
+  })
+
+connectorCommand
+  .command('remove')
+  .description('Remove a managed connector definition')
+  .argument('<id>', 'Connector identifier')
+  .action(async (id) => {
+    try {
+      await connectorRegistry.removeManagedConnector(id)
+      console.log(`🗑️  Removed connector ${id}`)
+    } catch (error) {
+      console.error(
+        `\n❌ Failed to remove connector "${id}": ${
+          error instanceof Error ? error.message : String(error)
+        }\n`
+      )
+      process.exit(1)
+    }
   })
 
 connectorCommand

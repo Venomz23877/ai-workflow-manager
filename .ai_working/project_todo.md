@@ -1,11 +1,13 @@
 # Project TODO — AI Workflow Manager
 
 ## Baseline Build & Packaging
+
 - [ ] Validate `npm run dev` end-to-end (renderer launch, preload bridge checks).
 - [ ] Package Windows installer via `npm run package:win`, document results.
 - [ ] Smoke test packaged app (GUI + CLI) and capture findings in wrap-up notes.
 
 ## Architecture & Documentation
+
 - [ ] Expand `docs/architecture.md` with sequence diagrams or component illustrations.
 - [ ] Draft `docs/connector-interface.md` detailing `WorkflowDataConnector` contract, configuration schema, and testing requirements.
 - [ ] Add configuration management guidelines (env vars, settings UI) to docs.
@@ -13,6 +15,7 @@
 - [ ] Document state machine execution model and persistence strategy for workflows.
 
 ## Connector Implementation Roadmap
+
 - [ ] Formalize connector factory/registry module in `src/core/connectors/`.
 - [ ] Refactor existing SQLite access into `LocalSqliteConnector` implementing the shared interface.
 - [ ] Scaffold test harness for connector contract verification (unit + integration).
@@ -29,6 +32,7 @@
 - [ ] Implement secure credential vault (OS keychain or encrypted local store) for API keys and secrets.
 
 ## UX & Settings
+
 - [ ] Design GUI settings panel for selecting and configuring connectors.
 - [ ] Provide CLI commands for listing, adding, and switching connectors.
 - [ ] Document connector deployment steps for third-party integrations.
@@ -40,6 +44,7 @@
 - [ ] Provide wizard for setting up default workflow templates and connector selections.
 
 ## Operations & Quality
+
 - [ ] Automate lint/format enforcement (Prettier, ESLint) in CI.
 - [ ] Set up packaging CI job to produce installers per release branch.
 - [ ] Define telemetry/logging approach for connector health (opt-in by default).
@@ -49,3 +54,12 @@
 - [ ] Add vulnerability remediation workflow (monitor `npm audit`, patch schedule).
 - [ ] Implement centralized logging/telemetry pipeline across main, renderer, and connectors.
 
+## Sprint 4 Kickoff
+
+- [x] Finalize ConfigService schema updates (connectors, vault, diagnostics, retention).
+- [x] Implement ConnectorRegistry interfaces, vault adapters, and health checks.
+- [x] Wire SchedulerService to WorkflowRuntime with cron parsing + NotificationService alerts.
+- [x] Build renderer diagnostics/settings panels (logs, telemetry, notifications, schedules).
+- [x] Add TemplateRegistry permissions plus export/import manifest tooling.
+- [x] Implement retention policies + automated cleanup for logs, telemetry, backups, security scans.
+- [ ] Document new CLI flows (connectors, scheduler, retention) and add QA scripts.

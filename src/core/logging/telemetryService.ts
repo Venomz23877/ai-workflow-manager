@@ -12,7 +12,10 @@ export class TelemetryService {
   private queue: TelemetryEvent[] = []
   private destDir: string
 
-  constructor(private configService: ConfigService, baseDir: string = getAppDataDir()) {
+  constructor(
+    private configService: ConfigService,
+    baseDir: string = getAppDataDir()
+  ) {
     this.destDir = path.join(baseDir, 'telemetry')
     if (!fs.existsSync(this.destDir)) {
       fs.mkdirSync(this.destDir, { recursive: true })
@@ -49,4 +52,3 @@ export class TelemetryService {
     return dest
   }
 }
-

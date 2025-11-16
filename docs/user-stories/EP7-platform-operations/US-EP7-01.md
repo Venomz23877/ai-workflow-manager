@@ -54,4 +54,3 @@ Then the configured logs pack into a ZIP along with metadata
 
 - Logging config stored per module; watchers update Winston/pino loggers at runtime.
 - Provide rotation/compression settings.
-

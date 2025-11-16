@@ -19,7 +19,9 @@ describe('ValidationService', () => {
     const service = new ValidationService()
     const result = service.validate({
       ...baseDraft,
-      transitions: [{ id: 't1', source: 'missing', target: 'nodeA', trigger: undefined, validators: [] }]
+      transitions: [
+        { id: 't1', source: 'missing', target: 'nodeA', trigger: undefined, validators: [] }
+      ]
     })
     expect(result.valid).toBe(false)
     expect(result.errors[0]).toMatch(/missing source node/)
@@ -50,4 +52,3 @@ describe('ValidationService', () => {
     expect(result.errors).toContain('Description required')
   })
 })
-

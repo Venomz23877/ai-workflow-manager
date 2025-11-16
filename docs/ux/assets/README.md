@@ -21,4 +21,3 @@ Given the shift away from external design tools, this directory tracks any suppl
 - [ ] Document process for exporting screenshots from coded prototypes when required.
 
 This README will evolve alongside the narrative UX documentation and prototypes.
-

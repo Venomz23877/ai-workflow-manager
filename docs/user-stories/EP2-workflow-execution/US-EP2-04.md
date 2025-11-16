@@ -48,4 +48,3 @@ Then the CLI streams follow-up events from the run until I exit
 - Support authentication/permissions consistent with UI.
 - Provide shell completion metadata for action names.
 - Open questions: do we log operator reason messages for auditing?
-
